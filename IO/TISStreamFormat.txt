@@ -1,0 +1,13 @@
+uint32 uint32 <- header
+messageType, payloadSize
+
+uint32, uint32, str, uint32, uint32 <- container
+containerBegin, nameSize+1, name, hintId, flags
+
+uint32 <- container end
+container_end
+
+uint32, uint32, T <- parameter
+type_ID, count, value
+
+
