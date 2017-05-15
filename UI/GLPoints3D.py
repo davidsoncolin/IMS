@@ -55,7 +55,7 @@ class GLPoints3D:
 	def drawCrosses(self, which, offset=0):
 		numVs = len(which)
 		if numVs:
-			vs  = np.zeros((numVs*4,3),dtype=np.float32)
+			vs = np.zeros((numVs*4,3),dtype=np.float32)
 			ed = np.zeros((numVs,4),dtype=np.int32)
 			verts = self.vertices[which+offset]
 			ms = 2

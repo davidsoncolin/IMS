@@ -10,7 +10,7 @@ import numpy as np
 from UI import QOutliner, createAction, errorDialog
 from GViewer import GPanel
 from UI.QCore import QfloatWidget, QmatrixWidget
-from GCore  import State
+from GCore import State
 from UI import COLOURS
 import GRIP
 from IO import load
@@ -111,40 +111,14 @@ class QRetargetPanel(GPanel):
 		self.tarButton = QtGui.QPushButton(self)
 		self.tarButton.setEnabled(False)
 		self.tarButton.setObjectName("target")
-		ss = """ QPushButton {
-     border: 2px solid #000000;
-     border-radius: 12px;
-     min-width: 80px;
-     min-height: 25px;
- }
-
- QPushButton#source {
-     background-color: %s;
- }
- QPushButton#target {
-     background-color: %s;
- }
- QPushButton#source:checked {
-     background-color: %s;
- }
- QPushButton#target:checked {
-     background-color: %s;
- }
- QPushButton:pressed {
-     background-color: %s;
- }
-
- QPushButton:flat {
-     border: none; /* no border for a flat push button */
- }
-
- QPushButton:default {
-     border-color: navy; /* make the default button prominent */
- }""" % (rgb_to_hex(COLOURS['Background']),
-		rgb_to_hex(COLOURS['Background']),
-		rgb_to_hex(COLOURS['Bone']),
-		rgb_to_hex(COLOURS['Active']),
-		rgb_to_hex(COLOURS['Hilighted']))
+		ss = """ QPushButton { border: 2px solid #000000; border-radius: 12px; min-width: 80px; min-height: 25px; }
+QPushButton#source { background-color: %s; }
+QPushButton#target { background-color: %s; }
+QPushButton#source:checked { background-color: %s; }
+QPushButton#target:checked { background-color: %s; }
+QPushButton:pressed { background-color: %s; }
+QPushButton:flat { border: none; /* no border for a flat push button */ }
+QPushButton:default { border-color: navy; /* make the default button prominent */ }""" % (rgb_to_hex(COLOURS['Background']), rgb_to_hex(COLOURS['Background']), rgb_to_hex(COLOURS['Bone']), rgb_to_hex(COLOURS['Active']), rgb_to_hex(COLOURS['Hilighted']))
 		self.srcButton.setStyleSheet(ss)
 		self.tarButton.setStyleSheet(ss)
 		self.srcButton.setCheckable(True)
@@ -311,8 +285,7 @@ class QPassListWidget(QtGui.QGroupBox):
 		self.rtg_key=None
 		self._setting = False
 		state_key = uuid4().hex
-		self._state_key = State.addKey(state_key,{'type':PASS_LIST_TYPE,
-												  'attrs':{'selection':0}})
+		self._state_key = State.addKey(state_key,{'type':PASS_LIST_TYPE, 'attrs':{'selection':0}})
 		# TODO
 		self.selection = None
 		#
@@ -377,7 +350,7 @@ class QPassListWidget(QtGui.QGroupBox):
 		self.blockUpdate = False
 
 	def move(self, di=1):
-		""" move the selected pass up (di=-1) or down (di=1).  Updates the model(ui) and the
+		""" move the selected pass up (di=-1) or down (di=1). Updates the model(ui) and the
 		ik pass order """
 		sm = self._passList.selectionModel()
 		try:
@@ -780,11 +753,10 @@ class QIKPassWidget(QtGui.QGroupBox):
 	def editJco(self, index):
 		if self.rtg_key is None: return
 		if not self._setting:
-			GRIP.setPassField(self.rtg_key,self.pass_name,'jointCutoffName',
-								   self.targetBoneModel.stringList()[index])
+			GRIP.setPassField(self.rtg_key,self.pass_name,'jointCutoffName', self.targetBoneModel.stringList()[index])
 		self.canEnable()
 		self.mpass = GRIP.getPass(self.rtg_key,self.pass_name)[0]
-		if self.mpass['enabled']  and not self.block_update:
+		if self.mpass['enabled'] and not self.block_update:
 			self.passEdited.emit()
 		State.push('Set Joint Cutoff Name')
 
@@ -1075,8 +1047,8 @@ class QCopyPassWidget(QtGui.QGroupBox):
 	def createWidgets(self):
 
 		self.toolBar = QtGui.QToolBar(self)
-		self.unmappedToolbar  = QtGui.QToolBar(self)
-		self.mappedToolbar  = QtGui.QToolBar(self)
+		self.unmappedToolbar = QtGui.QToolBar(self)
+		self.mappedToolbar = QtGui.QToolBar(self)
 
 		self.toolBar.addAction(createAction('Clear Copy Pass', self.parent(), [self.reset], tip='Clear all copy pass settings'))
 		self.toolBar.addAction(createAction('>>passes', self.parent(), [self.printPasses], tip='debug passes'))
@@ -1210,7 +1182,7 @@ class QCopyPassWidget(QtGui.QGroupBox):
 		matchingTarget = None
 		#for i in selected.indexes(): # will be one
 		try:
-			selectedIndex =  selected.indexes()[0]
+			selectedIndex = selected.indexes()[0]
 		except IndexError:
 			joint = None
 		else:
@@ -1403,7 +1375,7 @@ class QSwizzleWidget(QtGui.QGroupBox):
 		self.clearPushButton.pressed.connect(self.clearSwizzle)
 
 	def setAutoSwizzle(self):
-		if not self.s or not  self.t:
+		if not self.s or not self.t:
 			return
 		baseSwizzle = GRIP.getAutoSwizzle(self.rtg_key,(self.s,self.t))
 		self.matrixWidget.setValue(baseSwizzle)
@@ -1438,7 +1410,7 @@ class QSwizzleWidget(QtGui.QGroupBox):
 		State.push('Swizzle Edit')
 
 class QCopyOffsetWidget(QtGui.QGroupBox):
-	''' incomplete.  rotations should be represented the same way as swizzles, or, better as
+	''' incomplete. rotations should be represented the same way as swizzles, or, better as
 	rx,ry,rz in some frame in some order'''
 	copyOffsetEdited = QtCore.Signal()
 	def __init__(self, parent):
@@ -1662,8 +1634,7 @@ class GOutlinerPanel(GPanel):
 		self.layout().setStretch(1,1)
 
 		state_key = uuid4().hex
-		self._state_key = State.addKey(state_key,{'type':OUTLINER_TYPE,
-												  'attrs':{'expansion':None}})
+		self._state_key = State.addKey(state_key,{'type':OUTLINER_TYPE, 'attrs':{'expansion':None}})
 
 	def handleUserSelection(self, selected, deselected):
 		''' user changes the selection by clicking, emit what changed '''
@@ -1753,7 +1724,7 @@ def main():
 	outliner_connections = {'selectionChanged':[functools.partial(GRIP.updateSelection,retarget_panel),'self.updateGL']}
 	win.addWidget(outliner,'Outliner',outliner_connections)
 	retarget_connections = {'edited':[functools.partial(GRIP.updateMapping,win)],'updateRequest':[GRIP.updateRTGDict,'self.refresh'],
-				   			'hilight':[GRIP.hilightPrimitive]}
+				 			'hilight':[GRIP.hilightPrimitive]}
 	win.addWidget(retarget_panel,'Retarget',retarget_connections,QtCore.Qt.RightDockWidgetArea)
 	retarget_panel = win.set_widget['Retarget']
 	outliner = win.set_widget['Outliner']

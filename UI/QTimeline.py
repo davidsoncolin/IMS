@@ -13,12 +13,12 @@ FRAME_STEPS = [1,2,3,4,8,16]
 DEFAULT_RATE = 59.94
 RATES = [1.,6.,11.988,12.,14.985,15.,23.976,24.,24.975,25.,29.97,30.,48.,49.95,50.,59.94,60.,95.9,96.,99.9,100.,119.88,120.,1000.] # over 60 may not work because of qt refresh rate
 
-MIN_SAMPLE = -2e9  # a few hours at >100 samples per second
+MIN_SAMPLE = -2e9 # a few hours at >100 samples per second
 MAX_SAMPLE = 2e9
 
 
 class QTimeline(QtGui.QWidget):
-	'''time control widget.  features:
+	'''time control widget. features:
 
 	* draggable time slider
 	* playback toggle button
@@ -67,7 +67,7 @@ class QTimeline(QtGui.QWidget):
 		self.startSpinBox.setMinimum(MIN_SAMPLE)
 		self.startSpinBox.setMaximum(MAX_SAMPLE)
 		self.startSpinBox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-		self.startSpinBox.setKeyboardTracking(False)  # don't emit 3 times when typing 100
+		self.startSpinBox.setKeyboardTracking(False) # don't emit 3 times when typing 100
 
 		# editable display for end sample
 		self.endSpinBox = QtGui.QSpinBox(self)
@@ -167,7 +167,7 @@ class QTimeline(QtGui.QWidget):
 
 		if you set the current frame using this property:
 
-		* the ui will  update as expected
+		* the ui will update as expected
 		* if the frameNumber is out of the current lo/hi range then the frame number will be clipped
 
 		.. note::
@@ -193,7 +193,7 @@ class QTimeline(QtGui.QWidget):
 	@property
 	def lo(self):
 		''' yields the start frame. setting this property will adjust the range of the time
-		slider.  the end frame number will be preserved unless it would be less than the new min
+		slider. the end frame number will be preserved unless it would be less than the new min
 		in which case it is set to min+1'''
 		return self._lo
 
@@ -205,7 +205,7 @@ class QTimeline(QtGui.QWidget):
 	@property
 	def hi(self):
 		''' yields the end frame. setting this property will adjust the range of the time
-		slider.  the start frame number will be preserved unless it would be greater than the new
+		slider. the start frame number will be preserved unless it would be greater than the new
 		end value in which case it is set to end-1'''
 		return self._hi
 
@@ -216,7 +216,7 @@ class QTimeline(QtGui.QWidget):
 
 	@property
 	def frameStep(self):
-		''' yields the current frameStep.  setting this will update the frame step combo and add the
+		''' yields the current frameStep. setting this will update the frame step combo and add the
 		value to the combo list if it isn't in the defaults '''
 		return self._frameStep
 
@@ -265,7 +265,7 @@ class QTimeline(QtGui.QWidget):
 
 	@QtCore.Slot(int)
 	def _seekFrame(self, frame):
-		''' go to a frame (slot called when frameslider changes)  don't call this directly or the
+		''' go to a frame (slot called when frameslider changes) don't call this directly or the
 		time slider will not update
 
 		:param int frame: the frame to set to'''
@@ -288,7 +288,7 @@ class QTimeline(QtGui.QWidget):
 
 	@QtCore.Slot()
 	def gotoNextFrame(self, direction=1):
-		''' increment frame by frameStep and set the slider value to new frame.  set the frame
+		''' increment frame by frameStep and set the slider value to new frame. set the frame
 		number back to the start if it exceeds the max. this is called by the timer during
 		playback'''
 		frame = self._frame + direction * self._frameStep
@@ -301,7 +301,7 @@ class QTimeline(QtGui.QWidget):
 
 	@QtCore.Slot()
 	def gotoNextSecond(self, direction=1):
-		''' increment frame by frameStep and set the slider value to new frame.  set the frame
+		''' increment frame by frameStep and set the slider value to new frame. set the frame
 		number back to the start if it exceeds the max. this is called by the timer during
 		playback'''
 		frame = self._frame + self._frameStep * direction * int(self._fps + 0.5)
@@ -329,8 +329,8 @@ class QTimeline(QtGui.QWidget):
 		value from the :data:`FRAME_STEPS` dict based on the name of the selected rate in the
 		combo
 		# TODO: discuss.. should the current frame be changed to the nearest multiple of the
-		step? i think that gives more predictable playback.  it's complicated by the time slider
-		being draggable to values that are impossible to get to by single stepping.  the slider
+		step? i think that gives more predictable playback. it's complicated by the time slider
+		being draggable to values that are impossible to get to by single stepping. the slider
 		would need modifying to support dragging with snapping.
 		'''
 		self._frameStep = FRAME_STEPS[index]
@@ -360,7 +360,7 @@ if __name__ == '__main__':
 	win = QTimeline()
 	win.playing.connect(printFrame)
 
-	# win.frame = 110  # this will actually set to 100 because range is only 0-100
+	# win.frame = 110 # this will actually set to 100 because range is only 0-100
 	# assert(win.frame == 100)
 	# win.frame = 50
 	win.show()

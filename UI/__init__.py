@@ -5,10 +5,10 @@ from PySide import QtCore, QtGui
 K_NAME = 'name'
 K_COLOUR = 'colour'
 K_VISIBLE = 'visible'
-K_DRAW = 'draw'  # internal use, should this primitive draw or not
+K_DRAW = 'draw' # internal use, should this primitive draw or not
 K_SELECTED = 'selected'
 K_TYPE = 'objectType'
-K_PRIMITIVE = 'primitive'  # internal use, should this primitive draw or not
+K_PRIMITIVE = 'primitive' # internal use, should this primitive draw or not
 K_STARTINDEX = 'startIndex'
 K_FILENAME = 'filename'
 
@@ -20,7 +20,7 @@ ALL_KEYS = [k for k in locals().keys() if k.startswith('K_')]
 # types of 'objects'
 T_NULL = 'null'
 T_MOTION = 'motion'
-T_SKELETON = 'skeleton'  # has no motion
+T_SKELETON = 'skeleton' # has no motion
 T_CAMERAS = 'cameras'
 
 DRAWOPT_AXES = 0x1
@@ -109,14 +109,14 @@ SHORTCUTS = {
 			"&New": 'Ctrl+N',
 			"Import": 'Ctrl+Shift+O',
 			'Exit': 'Ctrl+Q',
-			'Play': ' ',  #QtGui.QKeySequence(QtCore.Qt.Key_MediaTogglePlayPause),
+			'Play': ' ', #QtGui.QKeySequence(QtCore.Qt.Key_MediaTogglePlayPause),
 			'Step Forward': '.',#QtGui.QKeySequence(QtCore.Qt.Key_MediaNext),
 			'Step Backward': ',',#QtGui.QKeySequence(QtCore.Qt.Key_MediaPrevious),
-			'Backward one second': 'Shift+,',  #QtGui.QKeySequence(QtCore.Qt.Key_MediaNext),
-			'Forward one second': 'Shift+.',  #QtGui.QKeySequence(QtCore.Qt.Key_MediaPrevious),
-			'Go to range start': 'Home',  #QtGui.QKeySequence(QtCore.Qt.Key_MediaNext),
-			'Go to range end': 'End',  #QtGui.QKeySequence(QtCore.Qt.Key_MediaPrevious),
-			'Delete': 'Del',  #QtGui.QKeySequence(QtCore.Qt.Key_MediaPrevious),
+			'Backward one second': 'Shift+,', #QtGui.QKeySequence(QtCore.Qt.Key_MediaNext),
+			'Forward one second': 'Shift+.', #QtGui.QKeySequence(QtCore.Qt.Key_MediaPrevious),
+			'Go to range start': 'Home', #QtGui.QKeySequence(QtCore.Qt.Key_MediaNext),
+			'Go to range end': 'End', #QtGui.QKeySequence(QtCore.Qt.Key_MediaPrevious),
+			'Delete': 'Del', #QtGui.QKeySequence(QtCore.Qt.Key_MediaPrevious),
 			'Toggle Fullsize': 'F10',
 			'Clear All': 'Ctrl+D',
 			}

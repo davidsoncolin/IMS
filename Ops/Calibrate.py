@@ -5,7 +5,7 @@ from GCore import Calibrate
 
 class Cameras(Op.Op):
 	def __init__(self, name='/Calibrate Cameras', locations='', detections='', x3ds='', solve_focal_length=True, solve_distortion=True,
-	             error_threshold=0.05, min_samples=100, jumpFrames=5, showDetections=False, frameRange=''):
+				error_threshold=0.05, min_samples=100, jumpFrames=5, showDetections=False, frameRange=''):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Camera locations', 'Camera locations', 'string', locations, {}),
@@ -124,8 +124,8 @@ class Cameras(Op.Op):
 			# to calibrate
 			if len(proposalDets) >= 5 and len(proposalX3ds) >= 5:
 				P, ks, rms = Calibrate.cv2_solve_camera_from_3d(proposalX3ds, proposalDets,
-				                                                solve_focal_length=solve_focal_length,
-				                                                solve_distortion=solve_distortion)
+																solve_focal_length=solve_focal_length,
+																solve_distortion=solve_distortion)
 
 				if ks[0] < -3. or ks[0] > 3.: ks[0] = 0.
 				if ks[1] < -3. or ks[1] > 3.: ks[1] = 0.
@@ -172,7 +172,7 @@ class Cameras(Op.Op):
 
 		# Build our collections and write to the interface
 		collectedDets = np.array(np.concatenate(cams), dtype=np.float32).reshape(-1, 2), \
-		                Interface.makeSplitBoundaries(map(len, cams_collected))
+						Interface.makeSplitBoundaries(map(len, cams_collected))
 		interface.setAttr('collect_rx2ds', collectedDets)
 		interface.setAttr('collect_x3ds', collectedX3ds)
 		interface.setAttr('x2ds_frames', x2ds_frames)
@@ -190,7 +190,7 @@ class Cameras(Op.Op):
 		if 'showDetections' in attrs and attrs['showDetections']:
 			colours = np.tile(dets_colours, (len(collectedDets[0]) / 5, 1))
 			allAttrs = {'x2ds': collectedDets[0], 'x2ds_splits': collectedDets[1],
-			            'x2ds_colours': colours}
+						'x2ds_colours': colours}
 			interface.createChild('collected', 'detections', attrs=allAttrs)
 
 

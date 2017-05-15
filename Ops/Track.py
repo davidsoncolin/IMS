@@ -43,10 +43,10 @@ class Track2D(Op.Op):
 
 class Track3D(Op.Op):
 	def __init__(self, name='/Track 3D', locations='', detections='', calibration='',
-	             x2d_threshold=6./2000, pred_2d_threshold=100./2000, x3d_threshold=30,
-	             tilt_threshold=0.0002, min_rays=3, numPolishIts=3, forceRayAgreement=True, boot=True, bootInterval=10,
-	             skeleton='', pointSize=12.0, colour=(0.8, 0.0, 0.8, 0.7), intersect_threshold=100., generateNormals=False,
-	             showContributions=False, frameRange='', enable=False):
+				x2d_threshold=6./2000, pred_2d_threshold=100./2000, x3d_threshold=30,
+				tilt_threshold=0.0002, min_rays=3, numPolishIts=3, forceRayAgreement=True, boot=True, bootInterval=10,
+				skeleton='', pointSize=12.0, colour=(0.8, 0.0, 0.8, 0.7), intersect_threshold=100., generateNormals=False,
+				showContributions=False, frameRange='', enable=False):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Locations', 'Locations', 'string', locations, {}),
@@ -139,7 +139,7 @@ class Track3D(Op.Op):
 			cameraPositions = np.array([m[4] for m in self.mats], dtype=np.float32)
 			if self.visibility is None: self.visibility = ISCV.ProjectVisibility.create()
 			self.visibility.setLods(tris, cameraPositions, np.concatenate((lodNormals)),
-			                        attrs['intersect_threshold'], attrs['generateNormals'])
+									attrs['intersect_threshold'], attrs['generateNormals'])
 
 		settings.visibility = self.visibility
 		settings.numPolishIts = attrs['numPolishIts']
@@ -147,7 +147,7 @@ class Track3D(Op.Op):
 
 		if self.tracker is None:
 			self.tracker = Label.Track3D(self.mats, attrs['x2d_threshold'], attrs['pred_2d_threshold'], attrs['x3d_threshold'],
-			                             attrs['tilt_threshold'], attrs['min_rays'], boot_interval=attrs['boot_interval'])
+										 attrs['tilt_threshold'], attrs['min_rays'], boot_interval=attrs['boot_interval'])
 
 		# booting = interface.attr('booting', atLocation='/root')
 		if not self.boot and attrs['boot']: #booting == 0 or not self.boot:# and attrs['boot']: #self.tracker.next_id == 0:
@@ -193,11 +193,12 @@ class Track3D(Op.Op):
 
 class Model(Op.Op):
 	def __init__(self, name='/Tracking Model', locations='', detections='', calibration='', tracking='', its=1, normals=False,
-	             x2d_threshold=20./2000, pred_2d_threshold=100./2000, x3d_threshold=30, boot=False, unlabelledPenalty=100.0, maxHypotheses=500,
-				 bootIts=5, mesh='', useWeights=False, useVisibility=False, visibilityLod='', intersection_threshold=100., generateNormals=False,
-	             showContributions=True, pointSize=8., colour=(0.8, 0.8, 0., 0.7), showLabelAssignment=True, visualiseLabels=False,
-	             frameRange='', showLabellingGraph=False, bootResetTo=10, bootReset=False, forceBoot=False, enable=False,
-	             use3dTracks=False):
+				x2d_threshold=20./2000, pred_2d_threshold=100./2000, x3d_threshold=30, boot=False, unlabelledPenalty=100.0,
+				maxHypotheses=500, bootIts=5, mesh='', useWeights=False, useVisibility=False, visibilityLod='',
+				intersection_threshold=100., generateNormals=False, showContributions=True, pointSize=8., 
+				colour=(0.8, 0.8, 0., 0.7), showLabelAssignment=True, visualiseLabels=False, frameRange='',
+				showLabellingGraph=False, bootResetTo=10, bootReset=False, forceBoot=False, enable=False,
+				use3dTracks=False):
 		fields = [
 			('name', 'Name', 'name', 'string', name, {}),
 			('locations', 'Skeleton locations', 'Skeleton locations', 'string', locations, {}),
@@ -353,7 +354,7 @@ class Model(Op.Op):
 				if rootMat.any():
 					self.model.rootMat = rootMat
 			except:
-				pass  # Probably no skeleton in the scene
+				pass # Probably no skeleton in the scene
 
 		if normals:
 			if attrs['mesh'] and interface.hasAttr('normals', atLocation=attrs['mesh']):
@@ -418,8 +419,8 @@ class Model(Op.Op):
 				# Check distance after booting
 				from GCore import SolveIK
 				m_x3ds, m_x3ds_labels = SolveIK.skeleton_marker_positions(skelDict, skelDict['rootMat'], skelDict['chanValues'],
-																		  self.model.effectorLabels, self.model.effectorData,
-																		  skelDict['markerWeights'])
+																		 self.model.effectorLabels, self.model.effectorData,
+																		 skelDict['markerWeights'])
 				diffs = m_x3ds[whichLabels] - x3ds
 				meanDiff = np.mean(diffs, axis=0)
 				diffSum = np.linalg.norm(diffs)
@@ -458,7 +459,7 @@ class Model(Op.Op):
 				tris = lodVerts[lodTris]
 				if self.visibility is None: self.visibility = ISCV.ProjectVisibility.create()
 				self.visibility.setLods(tris, self.cameraPositions, np.concatenate((lodNormals)),
-				                        attrs['intersection_threshold'], attrs['generateNormals'])
+										attrs['intersection_threshold'], attrs['generateNormals'])
 
 			if self.trackerDirty:
 				self.model.rebuildEffectorData(skelDict, self.getEffectorLabels(skelDict))
@@ -484,9 +485,9 @@ class Model(Op.Op):
 		skelDict = self.model.skelDict
 
 		# Colour marker points based on labels if we have been given any (from a detection location)
-		#   Not labelled: Red
-		#   Labelled (more than one ray): Green
-		#   Labelled (one ray): Blue
+		# Not labelled: Red
+		# Labelled (more than one ray): Green
+		# Labelled (one ray): Blue
 		# start = time.time()
 		# TODO: Make efficient
 		x3ds_colours = np.array([], dtype=np.float32)
@@ -495,7 +496,7 @@ class Model(Op.Op):
 			labelHits = np.array([len(np.where(self.model.labels == x3d_label)[0]) for x3d_label in x3ds_labels], dtype=np.int32)
 			x3ds_colours[np.where(labelHits == 1)[0]] = (0, 0, 1, 0.7)
 			x3ds_colours[np.where(labelHits > 1)[0]] = (0, 1, 0, 0.7)
-		# print '  > label hits:', (time.time() - start)
+		# print '> label hits:', (time.time() - start)
 
 		# Create reconstructed 3D points from the model
 		modelAttrs = {
@@ -537,7 +538,7 @@ class Model(Op.Op):
 		interface.setAttr('Gs', skelDict['Gs'].copy())
 
 		# NOTE: Shouldn't this be done in the update mesh op?
-		#       (maybe good to keep it as an option if we make it efficient)
+		# (maybe good to keep it as an option if we make it efficient)
 		# Update mesh data if any
 		# if attrs['mesh']:
 		# 	vs, vs_labels = getWorldSpaceMarkerPos(skelDict)
@@ -613,14 +614,15 @@ class Error(Op.Op):
 		from GCore import SolveIK
 		effectorLabels_gt = np.array([int(mn) for mn in sourceSkelDict['markerNames']], dtype=np.int32)
 		effectorData_gt = SolveIK.make_effectorData(skelDict)
-		x3ds_gt, x3ds_labels_gt = SolveIK.skeleton_marker_positions(sourceSkelDict, sourceSkelDict['rootMat'], sourceSkelDict['chanValues'],
-		                                                            effectorLabels_gt, effectorData_gt, sourceSkelDict['markerWeights'])
+		x3ds_gt, x3ds_labels_gt = SolveIK.skeleton_marker_positions(sourceSkelDict, sourceSkelDict['rootMat'],\
+																	sourceSkelDict['chanValues'], effectorLabels_gt, \
+																	effectorData_gt, sourceSkelDict['markerWeights'])
 
 		# Get effectors for target skeleton
 		effectorLabels = np.array([int(mn) for mn in skelDict['markerNames']], dtype=np.int32)
 		effectorData = SolveIK.make_effectorData(skelDict)
 		x3ds, x3ds_labels = SolveIK.skeleton_marker_positions(skelDict, skelDict['rootMat'], skelDict['chanValues'],
-		                                                      effectorLabels, effectorData, skelDict['markerWeights'])
+															  effectorLabels, effectorData, skelDict['markerWeights'])
 
 		d = (x3ds - x3ds_gt) ** 2
 		ed = np.sqrt(np.sum(d, axis=1))
@@ -677,9 +679,9 @@ class Error(Op.Op):
 
 		# Print stats for frame
 		# print "> Frame:", frame
-		# print "  - Effectors dists (min | max | total):", minEd, "|", maxEd, "|", totalEd
-		# print "  - Joint diffs (min | max | total):", minJointDiff, "|", maxJointDiff, "|", jointDiffs
-		# print "  - Label hits:", perc, "% |", int(numHits)
+		# print " - Effectors dists (min | max | total):", minEd, "|", maxEd, "|", totalEd
+		# print " - Joint diffs (min | max | total):", minJointDiff, "|", maxJointDiff, "|", jointDiffs
+		# print " - Label hits:", perc, "% |", int(numHits)
 
 		# Print average stats
 		if self.useFrame(interface.frame(), attrs['printRule']):
@@ -687,9 +689,9 @@ class Error(Op.Op):
 			avgJointDiff = self.jointsDiffs / self.numFrames
 			avgLabelHits = self.labelHits / self.numFrames
 			print "> AVERAGE:"
-			print "  - Effs (min | max | avg | total):", self.minEffectorsDist, "|", self.maxEffectorsDist, "|", avgEffDist, "|", self.effectorsDist
-			print "  - Joints (min | max | avg | total):", self.minJointDiff, "|", self.maxJointDiff, "|", avgJointDiff, "|", self.jointsDiffs
-			print "  - Labels (min | max | avg):", self.minLabelHits, "|", self.maxLabelHits, "|", avgLabelHits
+			print " - Effs (min | max | avg | total):", self.minEffectorsDist, "|", self.maxEffectorsDist, "|", avgEffDist, "|", self.effectorsDist
+			print " - Joints (min | max | avg | total):", self.minJointDiff, "|", self.maxJointDiff, "|", avgJointDiff, "|", self.jointsDiffs
+			print " - Labels (min | max | avg):", self.minLabelHits, "|", self.maxLabelHits, "|", avgLabelHits
 
 			if True:
 				import datetime, os
@@ -728,7 +730,7 @@ class Error(Op.Op):
 
 class Count3Ds(Op.Op):
 	def __init__(self, name='/Count_3D_Tracks', locations='', collectRule='', printRule='', exportRule='', exportPath='',
-	             numMaxElms=3, minNumPoints=100, reverse=False, allowOverrides=False, displayTracks=False):
+				numMaxElms=3, minNumPoints=100, reverse=False, allowOverrides=False, displayTracks=False):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'X3ds locations', 'string', locations, {}),
@@ -918,7 +920,7 @@ class Count3Ds(Op.Op):
 			ax2.bar(range(maxLabel + 1), labelSwitch[:, 0])
 
 			# from IO import IO
-			# IO.save(r'D:\IMS\TracksStats.io', {'/root/data': {'tracks': trackLifetimes}})
+			# IO.save(os.path.join(os.environ['GRIP_DATA'],'TracksStats.io'), {'/root/data': {'tracks': trackLifetimes}})
 
 			dumpName = 'Stats ' + str(datetime.datetime.now().strftime('%d-%m-%Y %H-%M-%S'))
 			fname = os.path.join(dumpDir, dumpName)
@@ -1104,7 +1106,7 @@ def calculateMissingFrames(trackLifetimes, x3ds_frames, trackId, mergeId):
 
 class MergeTracks(Op.Op):
 	def __init__(self, name='/Merge_Tracks', locations='', trackId=-1, mergeIds='', x3d_threshold=100., frame_threshold=30,
-	             suggest=True, executeMerge=False, fillMissingFrames=True, visualiseCandidates=False, visualisePrecedingCandidates=False,
+				suggest=True, executeMerge=False, fillMissingFrames=True, visualiseCandidates=False, visualisePrecedingCandidates=False,
 				 pointSize=12.0, colour1=(0, 0, 0, 1), colour2=(0.5, 0.5, 0.5, 1), clearCache=True):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
@@ -1262,7 +1264,7 @@ class MergeTracks(Op.Op):
 
 class AutoMergeTracks(Op.Op):
 	def __init__(self, name='/Auto_Merge_Tracks', locations='', x3d_threshold=100., frame_threshold=30,
-	             suggest=False, executeMerge=False, strictMerge=False, fillMissingFrames=True, minNumFrames=4):
+				suggest=False, executeMerge=False, strictMerge=False, fillMissingFrames=True, minNumFrames=4):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -1427,7 +1429,7 @@ class Interpolate(Op.Op):
 
 class Info(Op.Op):
 	def __init__(self, name='/Tracks_Info', locations='', basicInfo=True, detailedInfo=False, printInfo=False,
-	            plotTimeline=False, useFilters=True, filterMaxFrames=0):
+				plotTimeline=False, useFilters=True, filterMaxFrames=0):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -1640,7 +1642,7 @@ class AddMarkersToSkeleton(Op.Op):
 
 class Graph(Op.Op):
 	def __init__(self, name='/Track_Graph', locations='', frameRange='', x3d_threshold=300, nearestN=4, updateRange='',
-	             trackedX3ds=''):
+				trackedX3ds=''):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'X3ds locations', 'string', locations, {}),
@@ -1744,8 +1746,8 @@ def getWorldSpaceMarkerPos(skelDict):
 
 def det2imgXY(detection, (h, w)):
 	"""
-	Convert detection space (-1..1) to image space.  Compensate for non-square images
-	w: 1920    h:1080
+	Convert detection space (-1..1) to image space. Compensate for non-square images
+	w: 1920 h:1080
 	--
 	det       [0.48002064,  0.29927447]
 	measured  [1420,               253]
@@ -1754,13 +1756,10 @@ def det2imgXY(detection, (h, w)):
 	det       [ 0.78030837  0.49955559]
 	measured  [1709,                60]
 	computed  [1709.0960311889648, 809.76001739501953]
-
 	"""
-
 	width, height = np.float32(w), np.float32(h)
 	x = (width / 2.) + (width * detection[0] / 2.)
 	y = (height / 2.) - (width * detection[1] / 2.)
-
 	return [x, y]
 
 

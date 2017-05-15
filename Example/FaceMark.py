@@ -22,6 +22,8 @@ state keys:
 /flip            : array, for each vertex the mirror-image (num_verts int32)
 /order           : array, the original ordering of the images (num_images int32)
 /frame_number    : the index of the currently-editing frame (int)
+
+unfortunately still WIP; in that it can't quite build everything from scratch yet
 '''
 
 global g_predictor, g_aam_model

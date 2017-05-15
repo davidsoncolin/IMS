@@ -59,7 +59,7 @@ class BaseItem(object):
 	def fullpath(self):
 		if self.parent and self.parent.fullpath():
 			return self.parent.fullpath() + "/" + self.path()
-		return  "/" + self.path()
+		return "/" + self.path()
 
 	def tooltip(self):
 		return self.fullpath()
@@ -316,7 +316,7 @@ class QOutlinerModel(QtCore.QAbstractItemModel):
 
 	def iterIndexes(self, parentIndex):
 		''' yield all child indexes, recursively under the provided parent index '''
-		item =  parentIndex.internalPointer()
+		item = parentIndex.internalPointer()
 		# if item: print "Searching Node: %s" % item.name
 		row_count = self.rowCount(parentIndex)
 		for row in xrange(0, row_count):
@@ -344,7 +344,7 @@ class QOutlinerModel(QtCore.QAbstractItemModel):
 			index = self.index(row, 0, parentIndex)
 		for row in xrange(0, self.rowCount(parentIndex)):
 			index = self.index(row, 0, parentIndex)
-			i =  self.find(index, name, role)
+			i = self.find(index, name, role)
 			if i: return i
 		return None
 		'''

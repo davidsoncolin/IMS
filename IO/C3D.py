@@ -128,17 +128,17 @@ class Header(object):
 
 		logging.info('''wrote C3D header information:
   parameter_block: %(parameter_block)s
-	  point_count: %(point_count)s
-	 analog_count: %(analog_count)s
-	  first_frame: %(first_frame)s
-	   last_frame: %(last_frame)s
-		  max_gap: %(max_gap)s
-	 scale_factor: %(scale_factor)s
-	   data_block: %(data_block)s
+      point_count: %(point_count)s
+     analog_count: %(analog_count)s
+      first_frame: %(first_frame)s
+       last_frame: %(last_frame)s
+          max_gap: %(max_gap)s
+     scale_factor: %(scale_factor)s
+       data_block: %(data_block)s
  sample_per_frame: %(sample_per_frame)s
-	   frame_rate: %(frame_rate)s
+       frame_rate: %(frame_rate)s
 long_event_labels: %(long_event_labels)s
-	  label_block: %(label_block)s''' % self.__dict__)
+      label_block: %(label_block)s''' % self.__dict__)
 
 	def read(self, handle):
 		'''Read and parse binary header data from a file handle.
@@ -166,17 +166,17 @@ long_event_labels: %(long_event_labels)s
 
 		logging.info('''loaded C3D header information:
   parameter_block: %(parameter_block)s
-	  point_count: %(point_count)s
-	 analog_count: %(analog_count)s
-	  first_frame: %(first_frame)s
-	   last_frame: %(last_frame)s
-		  max_gap: %(max_gap)s
-	 scale_factor: %(scale_factor)s
-	   data_block: %(data_block)s
+      point_count: %(point_count)s
+     analog_count: %(analog_count)s
+      first_frame: %(first_frame)s
+       last_frame: %(last_frame)s
+          max_gap: %(max_gap)s
+     scale_factor: %(scale_factor)s
+       data_block: %(data_block)s
  sample_per_frame: %(sample_per_frame)s
-	   frame_rate: %(frame_rate)s
+       frame_rate: %(frame_rate)s
 long_event_labels: %(long_event_labels)s
-	  label_block: %(label_block)s''' % self.__dict__)
+      label_block: %(label_block)s''' % self.__dict__)
 
 
 class Param(object):
@@ -194,17 +194,17 @@ class Param(object):
 		name: The name of the parameter.
 		desc: The description of the parameter.
 		data_size: The number of bytes that are in the binary representation of
-		  the data for this parameter. Use -1 if this parameter represents
-		  string data.
+		the data for this parameter. Use -1 if this parameter represents
+		string data.
 		dimensions: The dimensions of the data for this parameter. This is
-		  primarily used for string data ; if you want to use strings, they must
-		  all be passed in the "bytes" variable as a space-delimited string.
-		  Each field in the string must be the same length, and that length must
-		  be passed in the dimensions list.
+		primarily used for string data ; if you want to use strings, they must
+		all be passed in the "bytes" variable as a space-delimited string.
+		Each field in the string must be the same length, and that length must
+		be passed in the dimensions list.
 		bytes: The raw bytes for this parameter. Use struct.pack() to construct
-		  this value, or just pass the raw string data for string parameters.
+		this value, or just pass the raw string data for string parameters.
 		handle: If provided, the data for the parameter will be read from this
-		  file handle.
+		file handle.
 		'''
 		self.name = name
 		self.desc = desc
@@ -253,11 +253,11 @@ class Param(object):
 			kwargs['bytes'] = self.bytes[:40]
 
 		logging.debug('''wrote C3D parameter information:
-	  name: %(name)s
-	  desc: %(desc)s
+      name: %(name)s
+      desc: %(desc)s
  data_size: %(data_size)s
 dimensions: %(dimensions)s
-	 bytes: %(bytes)r''' % kwargs)
+     bytes: %(bytes)r''' % kwargs)
 
 	def read(self, handle):
 		'''Read binary data for this parameter from a file handle.
@@ -310,8 +310,8 @@ dimensions: %(dimensions)s
 				kwargs['shaped'] = ' -> %s' % val
 
 		return '''
-	  name: %(name)s
-	  desc: %(desc)s
+      name: %(name)s
+      desc: %(desc)s
  data_size: %(data_size)s
 dimensions: %(dimensions)s
 	 bytes: %(bytes)r%(shaped)s''' % kwargs
@@ -382,12 +382,10 @@ class Manager(object):
 		group = self._groups.get(group_id)
 
 		if group is None:
-			logging.debug('added C3D parameter group #%d: %s: %s',
-						  group_id, name, desc)
+			logging.debug('added C3D parameter group #%d: %s: %s', group_id, name, desc)
 			group = self._groups[group_id] = Group(name, desc)
 		else:
-			logging.debug('using C3D parameter group %s: %s',
-						  group.name, group.desc)
+			logging.debug('using C3D parameter group %s: %s', group.name, group.desc)
 
 		if name is not None:
 			name = name.upper()
@@ -475,7 +473,7 @@ class Reader(Manager):
 		if c3d_processor == 85:
 			logging.debug('DEC floats')
 			self.header.scale_factor = DECfloat_to_float(self.header.scale_factor)
-			self.header.frame_rate   = DECfloat_to_float(self.header.frame_rate)
+			self.header.frame_rate = DECfloat_to_float(self.header.frame_rate)
 			logging.info('corrected scale_factor = %s', self.header.scale_factor)
 			logging.info('corrected frame_rate = %s', self.header.frame_rate )
 
@@ -494,16 +492,13 @@ class Reader(Manager):
 				size, = struct.unpack('B', buf.read(1))
 				desc = size and buf.read(size) or ''
 				g = self.check_group(group_id, name, desc)
-				logging.debug('%s group takes up %d bytes', name,
-							  g.binary_size())
+				logging.debug('%s group takes up %d bytes', name, g.binary_size())
 			else:
 				g = self.check_group(group_id)
 				g.add_param(name, handle=buf)
-				logging.debug('%s parameter takes up %d bytes', name,
-							  g.params[name].binary_size())
+				logging.debug('%s parameter takes up %d bytes', name, g.params[name].binary_size())
 
-			logging.debug('consumed %d bytes of metadata',
-						  2 + abs(chars_in_name) + offset_to_next)
+			logging.debug('consumed %d bytes of metadata', 2 + abs(chars_in_name) + offset_to_next)
 		logging.debug('total bytes = %d, records = %d (header stated %d)' % ((self._handle.tell()-start), numpy.ceil((self._handle.tell()-start)/512.), num_records))
 		logging.debug('read %d parameter groups', len(self._groups) // 2)
 
@@ -549,8 +544,7 @@ class Reader(Manager):
 				if format == 'f' and c3d_processor == 85: analog = DECfloat_to_float_map(analog)
 			yield (numpy.array(points).reshape((ppf, 4)), numpy.array(analog))
 			if f and not f % 10000:
-				logging.debug('consumed %d frames from %dkB of frame data',
-							  f, (self._handle.tell() - start) / 1000)
+				logging.debug('consumed %d frames from %dkB of frame data', f, (self._handle.tell() - start) / 1000)
 
 		logging.info('iterated over %d frames', f)
 
@@ -615,16 +609,13 @@ class Writer(Manager):
 			self._handle.write(name)
 			self._handle.write(struct.pack('h', param.binary_size() - 2 - len(name)))
 			param.write(self._handle)
-			logging.debug('writing %d bytes yields offset %d',
-						  4 + len(name) + param.binary_size(), self._handle.tell())
-		logging.debug('group %s ends at byte offset %d',
-					  group.name, self._handle.tell())
+			logging.debug('writing %d bytes yields offset %d', 4 + len(name) + param.binary_size(), self._handle.tell())
+		logging.debug('group %s ends at byte offset %d', group.name, self._handle.tell())
 
 	def write_frames(self, frames):
 		'''Write the given list of frame data to our file handle.
 
-		frames: A sequence of (points, analog) tuples, each containing data for
-		  one frame.
+		frames: A sequence of (points, analog) tuples, each containing data for one frame.
 		'''
 		assert self._handle.tell() == 512 * (self.header.data_block - 1)
 		format = 'fi'[self.group('POINT').get_float('SCALE') >= 0]
@@ -637,13 +628,8 @@ class Writer(Manager):
 			analog.tofile(self._handle)
 		self._pad_block()
 
-	def write_like_phasespace(self, frames, frame_count,
-							  point_frame_rate=480.0,
-							  analog_frame_rate=0.0,
-							  point_scale_factor=-1.0,
-							  point_units='mm  ',
-							  gen_scale=1.0,
-							  ):
+	def write_like_phasespace(self, frames, frame_count, point_frame_rate=480.0, analog_frame_rate=0.0, point_scale_factor=-1.0,
+							point_units='mm  ', gen_scale=1.0, ):
 		'''Write a set of frames to a file so it looks like Phasespace wrote it.
 
 		frames: The sequence of frames to write.
@@ -661,71 +647,30 @@ class Writer(Manager):
 		# POINT group
 		ppf = len(points)
 		point_group = self.check_group(1, 'POINT', 'POINT group')
-		point_group.add_param('USED', desc='Number of 3d markers',
-							  data_size=2,
-							  bytes=struct.pack('H', ppf))
-		point_group.add_param('FRAMES', desc='frame count',
-							  data_size=2,
-							  bytes=struct.pack('H', min(65535, frame_count)))
-		point_group.add_param('DATA_START', desc='data block number',
-							  data_size=2,
-							  bytes=struct.pack('H', 0))
-		point_group.add_param('SCALE', desc='3d scale factor',
-							  data_size=4,
-							  bytes=struct.pack('f', point_scale_factor))
-		point_group.add_param('RATE', desc='3d data capture rate',
-							  data_size=4,
-							  bytes=struct.pack('f', point_frame_rate))
-		point_group.add_param('X_SCREEN', desc='X_SCREEN parameter',
-							  data_size=-1,
-							  dimensions=[2],
-							  bytes='+X')
-		point_group.add_param('Y_SCREEN', desc='Y_SCREEN parameter',
-							  data_size=-1,
-							  dimensions=[2],
-							  bytes='+Z')
-		point_group.add_param('UNITS', desc='3d data units',
-							  data_size=-1,
-							  dimensions=[len(point_units)],
-							  bytes=point_units)
-		point_group.add_param('LABELS', desc='labels',
-							  data_size=-1,
-							  dimensions=[5, ppf],
-							  bytes=''.join('M%03d ' % i for i in xrange(ppf)))
-		point_group.add_param('DESCRIPTIONS', desc='descriptions',
-							  data_size=-1,
-							  dimensions=[16, ppf],
-							  bytes=' ' * 16 * ppf)
+		point_group.add_param('USED', desc='Number of 3d markers', data_size=2, bytes=struct.pack('H', ppf))
+		point_group.add_param('FRAMES', desc='frame count', data_size=2, bytes=struct.pack('H', min(65535, frame_count)))
+		point_group.add_param('DATA_START', desc='data block number', data_size=2, bytes=struct.pack('H', 0))
+		point_group.add_param('SCALE', desc='3d scale factor', data_size=4, bytes=struct.pack('f', point_scale_factor))
+		point_group.add_param('RATE', desc='3d data capture rate', data_size=4, bytes=struct.pack('f', point_frame_rate))
+		point_group.add_param('X_SCREEN', desc='X_SCREEN parameter', data_size=-1, dimensions=[2], bytes='+X')
+		point_group.add_param('Y_SCREEN', desc='Y_SCREEN parameter', data_size=-1, dimensions=[2], bytes='+Z')
+		point_group.add_param('UNITS', desc='3d data units', data_size=-1, dimensions=[len(point_units)], bytes=point_units)
+		point_group.add_param('LABELS', desc='labels', data_size=-1, dimensions=[5, ppf], bytes=''.join('M%03d ' % i for i in xrange(ppf)))
+		point_group.add_param('DESCRIPTIONS', desc='descriptions', data_size=-1, dimensions=[16, ppf], bytes=' ' * 16 * ppf)
 
 		# ANALOG group
 		apf = len(analog)
 		analog_group = self.check_group(2, 'ANALOG', 'ANALOG group')
-		analog_group.add_param('USED', desc='analog channel count',
-							   data_size=2,
-							   bytes=struct.pack('H', apf))
-		analog_group.add_param('RATE', desc='analog frame rate',
-							   data_size=4,
-							   bytes=struct.pack('f', analog_frame_rate))
-		analog_group.add_param('GEN_SCALE', desc='analog general scale factor',
-							   data_size=4,
-							   bytes=struct.pack('f', gen_scale))
-		analog_group.add_param('SCALE', desc='analog channel scale factors',
-							   data_size=4,
-							   dimensions=[0])
-		analog_group.add_param('OFFSET', desc='analog channel offsets',
-							   data_size=2,
-							   dimensions=[0])
+		analog_group.add_param('USED', desc='analog channel count', data_size=2, bytes=struct.pack('H', apf))
+		analog_group.add_param('RATE', desc='analog frame rate', data_size=4, bytes=struct.pack('f', analog_frame_rate))
+		analog_group.add_param('GEN_SCALE', desc='analog general scale factor', data_size=4, bytes=struct.pack('f', gen_scale))
+		analog_group.add_param('SCALE', desc='analog channel scale factors', data_size=4, dimensions=[0])
+		analog_group.add_param('OFFSET', desc='analog channel offsets', data_size=2, dimensions=[0])
 
 		# TRIAL group
 		trial_group = self.check_group(3, 'TRIAL', 'TRIAL group')
-		trial_group.add_param('ACTUAL_START_FIELD', desc='actual start frame',
-							  data_size=2,
-							  dimensions=[2],
-							  bytes=struct.pack('I', 1))
-		trial_group.add_param('ACTUAL_END_FIELD', desc='actual end frame',
-							  data_size=2,
-							  dimensions=[2],
-							  bytes=struct.pack('I', frame_count))
+		trial_group.add_param('ACTUAL_START_FIELD', desc='actual start frame', data_size=2, dimensions=[2], bytes=struct.pack('I', 1))
+		trial_group.add_param('ACTUAL_END_FIELD', desc='actual end frame', data_size=2, dimensions=[2], bytes=struct.pack('I', frame_count))
 
 		# sync parameter information to header.
 		blocks = self.parameter_blocks()

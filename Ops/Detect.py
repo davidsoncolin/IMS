@@ -70,7 +70,7 @@ class SkeletonBlocker(Op.Op):
 			self.effectorTargets = np.zeros_like(self.effectorData[1])
 
 		markers, labels = SolveIK.skeleton_marker_positions(skelDict, skelDict['rootMat'], skelDict['chanValues'],
-		                                                    self.effectorLabels, self.effectorData, skelDict['markerWeights'])
+															self.effectorLabels, self.effectorData, skelDict['markerWeights'])
 
 		# markers, labels = Interface.getWorldSpaceMarkerPos(skelDict)
 
@@ -193,10 +193,10 @@ def pointsInTriangle(triangle, points, eps=0.05):
 
 class Dot(Op.Op):
 	def __init__(self, name='/Dot Detector', locations='', min_dot_size=1., max_dot_size=12., circularity_threshold=4.,
-				 threshold_bright=(160, 160, 160), threshold_dark_inv=20, calibration='', undistort=True, pointSize_bright=10,
-				 pointSize_dark=10, colour_bright=(0.3, 0.3, 0.7, 0.7), colour_dark=(1., 0.5, 0, 0.7),
-				 blockers='', lodBlockers='', useBlockers=True, useLodBlockers=True, blockerExclusivity=True,
-	             frameRange='', assignLabels=False):
+				threshold_bright=(160, 160, 160), threshold_dark_inv=20, calibration='', undistort=True, pointSize_bright=10,
+				pointSize_dark=10, colour_bright=(0.3, 0.3, 0.7, 0.7), colour_dark=(1., 0.5, 0, 0.7),
+				blockers='', lodBlockers='', useBlockers=True, useLodBlockers=True, blockerExclusivity=True,
+				frameRange='', assignLabels=False):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Camera locations', 'Camera locations', 'string', locations, {}),
@@ -358,7 +358,7 @@ class Dot(Op.Op):
 				# Now that we've filtered the points based on the skeleton bounding box blockers, we want to filter some more
 				# using LODs if we have any
 				# Note: If we use Python, we have to look at a more efficient way to do it, i.e. not loop through each triangle,
-				#       instead solve for all triangles at once?
+				# instead solve for all triangles at once?
 				# Note: Only process triangles facing me?
 				if lodBlockersDict and ci in lodBlockersDict:
 					d = lodBlockersDict[ci]
@@ -417,7 +417,7 @@ class Dot(Op.Op):
 
 class Wand(Op.Op):
 	def __init__(self, name='/Detect_Wand', locations='', ratio=2., x2d_threshold=.5, straightness_threshold=0.01, match_threshold=0.07,
-	             pointSize=8, frameRange=''):
+				pointSize=8, frameRange=''):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', '2D Detection locations', '2D Detections locations', 'string', locations, {}),
@@ -483,9 +483,9 @@ class Wand(Op.Op):
 
 class Mser(Op.Op):
 	def __init__(self, name='/MSER Detector', locations='', calibration='', numFeatures=2, gammaCorrection=False, monochromeRandom=False,
-	             sort=True, plotHistogram=False, plotImage=False, plotMarkers=False, undistort=True, pointSize_bright=10, pointSize_dark=10,
-	             colour_bright=(0.3, 0.3, 0.7, 0.7), colour_dark=(1., 0.5, 0, 0.7),
-	             blockers='', lodBlockers='', useBlockers=True, useLodBlockers=True):
+				sort=True, plotHistogram=False, plotImage=False, plotMarkers=False, undistort=True, pointSize_bright=10, pointSize_dark=10,
+				colour_bright=(0.3, 0.3, 0.7, 0.7), colour_dark=(1., 0.5, 0, 0.7),
+				blockers='', lodBlockers='', useBlockers=True, useLodBlockers=True):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'locations', 'Skeleton locations', 'string', locations, {}),
@@ -515,12 +515,12 @@ class Mser(Op.Op):
 		do_plot_image = attrs['do_plot_image']
 		do_plot_markers = attrs['do_plot_markers']
 		apply_gamma_correction = attrs['apply_gamma_correction']
-		n_features = attrs['n_features']  # use (x,y) rather than (x,y,area)
-		do_monochrome_random = attrs['do_monochrome_random']  # random colour look-up table
+		n_features = attrs['n_features'] # use (x,y) rather than (x,y,area)
+		do_monochrome_random = attrs['do_monochrome_random'] # random colour look-up table
 		f = FeatureDetector.run_detector
 		image = FeatureDetector.rgb2gray(img)
 		result_image, standard = f("davidMSER", img, image, do_plot_histogram, do_plot_image, do_plot_markers,
-								   do_monochrome_random, n_features, apply_gamma_correction)
+								do_monochrome_random, n_features, apply_gamma_correction)
 
 		if attrs['do_sorting']:
 			black_standard, blue_standard, white_standard = Utils.sorting_hat(image, standard)
@@ -617,7 +617,7 @@ class Mser(Op.Op):
 			# Now that we've filtered the points based on the skeleton bounding box blockers, we want to filter some more
 			# using LODs if we have any
 			# Note: If we use Python, we have to look at a more efficient way to do it, i.e. not loop through each triangle,
-			#       instead solve for all triangles at once?
+			# instead solve for all triangles at once?
 			# Note: Only process triangles facing me?
 			if lodBlockersDict and ci in lodBlockersDict:
 				d = lodBlockersDict[ci]
@@ -692,7 +692,7 @@ class Squares(Op.Op):
 		super(self.__class__, self).__init__(name, fields)
 
 	def segment_on_dt(self, img, attrs):
-		dt = cv2.distanceTransform(img, attrs['maskSize'], attrs['dst'])  # L2 norm, 3x3 mask
+		dt = cv2.distanceTransform(img, attrs['maskSize'], attrs['dst']) # L2 norm, 3x3 mask
 		dt = ((dt - dt.min()) / (dt.max() - dt.min()) * 255).astype(numpy.uint8)
 		dt = cv2.threshold(dt, attrs['threshold'], 255, cv2.THRESH_BINARY)[1]
 		lbl, ncc = nd_label(dt)
@@ -710,7 +710,7 @@ class Squares(Op.Op):
 		# img = cv2.cvtColor(cv2.imread(src), cv2.COLOR_BGR2GRAY)
 		img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
 		img = cv2.threshold(img, attrs['threshold2'], 255, cv2.THRESH_OTSU)[1]
-		img = 255 - img  # White: objects; Black: background
+		img = 255 - img # White: objects; Black: background
 
 		ws_result = self.segment_on_dt(img, attrs)
 
@@ -720,7 +720,7 @@ class Squares(Op.Op):
 		lbl, ncc = nd_label(ws_result)
 		for l in xrange(1, ncc + 1):
 			a, b = numpy.nonzero(lbl == l)
-			if img[a[0], b[0]] == 0:  # Do not color background.
+			if img[a[0], b[0]] == 0: # Do not color background.
 				continue
 			rgb = [random.randint(0, 255) for _ in xrange(3)]
 			ws_color[lbl == l] = tuple(rgb)
@@ -736,7 +736,7 @@ class Squares(Op.Op):
 		for l in xrange(1, ncc + 1):
 			yx = numpy.dstack(numpy.nonzero(lbl == l)).astype(numpy.int64)
 			xy = numpy.roll(numpy.swapaxes(yx, 0, 1), 1, 2)
-			if len(xy) < 6:  # Too small.
+			if len(xy) < 6: # Too small.
 				continue
 
 			ellipse = cv2.fitEllipse(xy)
@@ -749,7 +749,6 @@ class Squares(Op.Op):
 				color = [random.randint(60, 255) for _ in xrange(3)]
 				cv2.drawContours(ws_bincolor, [rect], 0, color, 2)
 
-		# cv2.imwrite(r'C:\Users\orng.IMAGINARIUMUK\Documents\Suit_outage.jpg', ws_bincolor)
 		return pts, ws_bincolor
 
 	def cook(self, location, interface, attrs):
@@ -783,9 +782,7 @@ class Squares(Op.Op):
 		darkAttrs = {
 			'x2ds': data0[0], 'x2ds_splits': data0[1], 'detections': p0, 'x2ds_colour': (1., 0.5, 0, 0.7)
 		}
-		# brightAttrs = {
-		#     'x2ds': data1[0], 'x2ds_splits': data1[1], 'detections': p1, 'x2ds_colour': (0., 0.7, 0., 0.7)
-		# }
+		# brightAttrs = {'x2ds': data1[0], 'x2ds_splits': data1[1], 'detections': p1, 'x2ds_colour': (0., 0.7, 0., 0.7)}
 		interface.createChild('dark', 'points2d', attrs=darkAttrs)
 		# interface.createChild('bright', 'detections', attrs=brightAttrs)
 
@@ -845,7 +842,7 @@ class Template(Op.Op):
 		img_grey = np.array(cv2.cvtColor(img, cv2.COLOR_RGB2GRAY), dtype=np.uint8)
 
 		matches = []
-		cv2.imwrite(os.path.join(r'D:\IMS\Surrey Calibration', 'Grip.png'), cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+		cv2.imwrite(os.path.join(os.environ['GRIP_TEMP'], 'Grip.png'), cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 		for template, (w, h), threshold in zip(self.templates, self.templateShapes, self.matchThresholds):
 			res = cv2.matchTemplate(img_grey, template, cv2.TM_CCOEFF_NORMED)
 			loc = np.where(res >= threshold)
@@ -964,7 +961,7 @@ class Template(Op.Op):
 
 class Corners(Op.Op):
 	def __init__(self, name='/Detect Corners', locations='', threshold=0.02, blockSize=2, ksize=3, k=0.04, undistort=True,
-	             filterThreshold=100000, filterNeighbourhoodSize=10, blockers='', lodBlockers=''):
+				filterThreshold=100000, filterNeighbourhoodSize=10, blockers='', lodBlockers=''):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'locations', 'Skeleton locations', 'string', locations, {}),
@@ -1038,7 +1035,7 @@ class Corners(Op.Op):
 			except:
 				continue
 
-			if True:   # Requires OpenCV 3
+			if True: # Requires OpenCV 3
 				ret, dst = cv2.threshold(dst, 0.01 * dst.max(), 255, 0)
 				dst = np.uint8(dst)
 
@@ -1144,8 +1141,8 @@ class RandomNoise(Op.Op):
 
 class BackgroundSubtraction(Op.Op):
 	def __init__(self, name='/Background_Subtraction', locations='', history=200, varThreshold=16, detectShadows=True, update=False,
-	             learningRate=-1, removeNoise=False, kernelType='Box', kernelSize=2, dilate=True, dilateKernelSize=5, dilateIterations=1,
-	             disableOpenCL=True, frameRange=''):
+				learningRate=-1, removeNoise=False, kernelType='Box', kernelSize=2, dilate=True, dilateKernelSize=5, dilateIterations=1,
+				disableOpenCL=True, frameRange=''):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -1177,8 +1174,8 @@ class BackgroundSubtraction(Op.Op):
 
 			# Create background subtractor MOG2
 			self.subtractor = cv2.createBackgroundSubtractorMOG2(history=attrs['history'],
-																 varThreshold=attrs['varThreshold'],
-																 detectShadows=attrs['detectShadows'])
+																varThreshold=attrs['varThreshold'],
+																detectShadows=attrs['detectShadows'])
 			# Create kernels
 			kernelSize = attrs['kernelSize']
 			kernelType = attrs['kernelType']

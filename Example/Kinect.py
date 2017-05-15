@@ -31,8 +31,8 @@ except:
 				g_screen_lock = thread.allocate()
 				g_depth_data, g_video_data = None,None
 				g_kinect = nui.Runtime()
-				g_kinect.depth_frame_ready += freenect.depth_frame_ready    
-				g_kinect.video_frame_ready += freenect.video_frame_ready    
+				g_kinect.depth_frame_ready += freenect.depth_frame_ready
+				g_kinect.video_frame_ready += freenect.video_frame_ready
 				#g_kinect.video_stream.open(nui.ImageStreamType.Video, 2, nui.ImageResolution.Resolution1280x1024, nui.ImageType.Color)
 				g_kinect.video_stream.open(nui.ImageStreamType.Video, 2, nui.ImageResolution.Resolution640x480, nui.ImageType.Color)
 				#g_kinect.depth_stream.open(nui.ImageStreamType.Depth, 2, nui.ImageResolution.Resolution640x480, nui.ImageType.Depth)

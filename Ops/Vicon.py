@@ -6,7 +6,7 @@ from IO import ViconReader, C3D, OptitrackReader
 
 class C3d(Op.Op):
 	def __init__(self, name='/Read_C3D', locations='', c3dFilename='', markerSrc='', subjectName='', offset=0, step=1, debug=False,
-	             timecodeLocation='', pointSize=16., colour=(0., 0., 1., 0.7), includeMissing=False):
+				 timecodeLocation='', pointSize=16., colour=(0., 0., 1., 0.7), includeMissing=False):
 		fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -104,7 +104,7 @@ class C3d(Op.Op):
 			'missingDataFlags': missingDataFlags,
 			'x3ds_pointSize': attrs['pointSize'],
 			'x3ds_colour': eval(attrs['colour']),
-		    'timecode': self.timecode,
+			'timecode': self.timecode,
 			'frameRange': [self.firstFrame, self.lastFrame]
 		}
 		interface.createChild(interface.name(), 'points3d', atLocation=interface.parentPath(), attrs=pAttrs)
@@ -112,7 +112,7 @@ class C3d(Op.Op):
 
 class C3dIo(Op.Op):
 	def __init__(self, name='/Read_C3D_IO', locations='', c3dFilename='', offset=0, stepSize=1, pointSize=10.,
-	             colour=(0., 0., 1., 0.7), adjustTimeline=True, reverse=False):
+				 colour=(0., 0., 1., 0.7), adjustTimeline=True, reverse=False):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -230,7 +230,7 @@ class Xcp(Op.Op):
 
 class X2d(Op.Op):
 	def __init__(self, name='/Read X2D', locations='/root', x2dFilename='',
-	             pointSize=8.0, colour=(0.0, 1.0, 0.0, 0.5)):
+				 pointSize=8.0, colour=(0.0, 1.0, 0.0, 0.5)):
 		fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -277,8 +277,8 @@ class X2d(Op.Op):
 
 class XcpAndX2d(Op.Op):
 	def __init__(self, name='/Read XCP and X2D', locations='/root', xcpFilename='', x2dFilename='',
-	             offset=0, step=1, pointSize=8.0, colour=(0.0, 1.0, 0.0, 0.5), cameraOffset=0, timecodeLocation='',
-	             timecodeOverride='', reverse=False, adjustTimeline=True):
+				 offset=0, step=1, pointSize=8.0, colour=(0.0, 1.0, 0.0, 0.5), cameraOffset=0, timecodeLocation='',
+				 timecodeOverride='', reverse=False, adjustTimeline=True):
 		fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -504,8 +504,7 @@ class SurreyCalBBC(Op.Op):
 		height, width = 1080, 1920
 		if not self.cals:
 			import os
-			# calPath = r'D:\ReframeDump\still_calibration'
-			calPath = r'D:\ReframeDump\moving_calibration'
+			calPath = os.path.join(os.environ['GRIP_DATA'],'moving_calibration')
 			try:
 				for file in os.listdir(calPath):
 					if file.endswith('.cal'):

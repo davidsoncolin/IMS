@@ -79,9 +79,9 @@ class Instance:
 		return ops
 
 	# Note: Going forward it would be more efficient to not collect, instead do it in a deferred manner where
-	#       the locations are only checked and evaluated as they are traversed
+	# the locations are only checked and evaluated as they are traversed
 	def _collectLocationMatches(self, locations, absolute):
-		if absolute: return locations   # Just to simplify the calling code
+		if absolute: return locations # Just to simplify the calling code
 
 		matches = []
 		for sgLocation in self.interface.scenegraphLocations():
@@ -117,7 +117,7 @@ class Instance:
 		# print self.id, '| cookOps: frame =', frame
 		# print self.id, '| interface:', self.interface.locations()
 		# Note: For now we force a recook on a new frame
-		#       ATM we should cook all downstream ops of one that has changed
+		# ATM we should cook all downstream ops of one that has changed
 		cookFrame = self._isNewFrame(frame)
 		# if not forceRecook:
 		# 	forceRecook = cookFrame
@@ -226,7 +226,7 @@ class Instance:
 					self.interface.setLocation(location)
 					if logTime:
 						start = time.time()
-						print '  > Cook: location =', location
+						print ' > Cook: location =', location
 
 					op.cook(location, self.interface, attrs)
 					op.setLastCookedFrame(frame)
@@ -238,7 +238,7 @@ class Instance:
 			else:
 				if logTime:
 					start = time.time()
-					print '  > Cook: location =', opName
+					print ' > Cook: location =', opName
 
 				self.interface.setLocation(opName)
 				op.cook(opName, self.interface, attrs)
@@ -274,8 +274,8 @@ class Instance:
 		if self.enableCache: self.interface.addFrameToCache()
 
 		# Note: This is too simplistic. We need to take account of what locations are dirty and collect them in a list
-		#       Then if we have any locations flagged as dirty we pass them to the processing function which ignores
-		#       all locations which have not been flagged.
+		# Then if we have any locations flagged as dirty we pass them to the processing function which ignores
+		# all locations which have not been flagged.
 		cookedLocations = self.interface.cookedLocations()
 		if len(cookedLocations) > 0 and len(self.renderRegistryCbs) > 0:
 			# print "cookedLocations =", cookedLocations
@@ -409,7 +409,7 @@ class Instance:
 			self.addGuiOp(Mesh.CharacterFromSkeleton(locations='/root/character', skelFilename=filename))
 		elif fname.endswith('.mov'):
 			self.addGuiOp(Video.Sequence(locations='/root/cameras', directory=head, prefix=prefix, useCalibration=False,
-			                             useTimecode=False))
+										useTimecode=False))
 		elif fname.endswith('.gplvm'):
 			self.addGuiOp(QuadOps.ImportGPLVM(locations='/root/model', filename=filename))
 
@@ -456,42 +456,42 @@ class Instance:
 
 		for opName in opNames:
 			win.addMenuItem({'menu': '&Add Op', 'item': opName,
-			                 'tip': '',
-			                 'cmd': self._addOp, 'args': [registeredOps[opName], win]})
+							'tip': '',
+							'cmd': self._addOp, 'args': [registeredOps[opName], win]})
 
 		editMenu = win.getOrCreateMenu('&Edit')
 		editMenu.addSeparator()
 
 		win.addMenuItem({'menu': '&Edit', 'item': 'Flush',
-		                 'shortcut':'Ctrl+F',
-		                 'tip': 'Flushes state and interface (cooked) data, and layers',
-		                 'cmd': self.flush, 'args': [True]})
+						'shortcut':'Ctrl+F',
+						'tip': 'Flushes state and interface (cooked) data, and layers',
+						'cmd': self.flush, 'args': [True]})
 
 		win.addMenuItem({'menu': '&Edit', 'item': 'Soft Flush',
-		                 'tip': 'Retains cooked data',
-		                 'cmd': self.flush, 'args': [False]})
+						'tip': 'Retains cooked data',
+						'cmd': self.flush, 'args': [False]})
 
 		win.addMenuItem({'menu': '&Edit', 'item': 'Refresh',
-		                 'tip': 'Refresh',
-		                 'cmd': self.refresh, 'args': []})
+						'tip': 'Refresh',
+						'cmd': self.refresh, 'args': []})
 
 		editMenu.addSeparator()
 
 		win.addMenuItem({'menu': '&Edit', 'item': 'Load Cache..',
-		                 'tip': 'Load Op Interface Cache',
-		                 'cmd': self.loadCache, 'args': []})
+						'tip': 'Load Op Interface Cache',
+						'cmd': self.loadCache, 'args': []})
 
 		win.addMenuItem({'menu': '&Edit', 'item': 'Save Cache..',
-		                 'tip': 'Save Op Interface Cache',
-		                 'cmd': self.saveCache, 'args': []})
+						'tip': 'Save Op Interface Cache',
+						'cmd': self.saveCache, 'args': []})
 
 		win.addMenuItem({'menu': '&Edit', 'item': 'Disable Cache',
-		                 'tip': 'Disable Cache',
-		                 'cmd': self.setUseCache, 'args': [False]})
+						'tip': 'Disable Cache',
+						'cmd': self.setUseCache, 'args': [False]})
 
 		win.addMenuItem({'menu': '&Edit', 'item': 'Enable Cache',
-		                 'tip': 'Enable Cache',
-		                 'cmd': self.setUseCache, 'args': [True]})
+						'tip': 'Enable Cache',
+						'cmd': self.setUseCache, 'args': [True]})
 
 	def setCallbacks(self, win):
 		win.preLoadCB = self.preBuildOps

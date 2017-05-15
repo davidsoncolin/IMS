@@ -63,19 +63,19 @@ def test_project_assign(x2ds, splits, x3ds, x3ds_labels, Ps, x2d_threshold):
 	labels_tmp = np.zeros(len(proj_x2ds),dtype=np.int32)
 	sc = 0
 	for ci,cloud in enumerate(clouds2):
-		x2d   = x2ds[splits[ci]:splits[ci+1]]
-		label = labels_out[splits[ci]:splits[ci+1]]
-		vel   = vels  [splits[ci]:splits[ci+1]]
-		px2d  = proj_x2ds  [proj_splits[ci]:proj_splits[ci+1]]
-		lc    = labels_tmp [proj_splits[ci]:proj_splits[ci+1]]
-		pl    = proj_labels[proj_splits[ci]:proj_splits[ci+1]]
+		x2d		= x2ds[splits[ci]:splits[ci+1]]
+		label	= labels_out[splits[ci]:splits[ci+1]]
+		vel		= vels[splits[ci]:splits[ci+1]]
+		px2d	= proj_x2ds[proj_splits[ci]:proj_splits[ci+1]]
+		lc		= labels_tmp[proj_splits[ci]:proj_splits[ci+1]]
+		pl		= proj_labels[proj_splits[ci]:proj_splits[ci+1]]
 		scores,matches,matches_splits = cloud.score(px2d)
 		sc += ISCV.min_assignment_sparse(scores, matches, matches_splits, x2d_threshold**2, lc)
 		labelled = np.where(lc!=-1)[0]
 		if len(labelled) != 0:
 			which_x2ds = lc[labelled]
 			label[which_x2ds] = pl[labelled]
-			vel[which_x2ds]   = x2d[which_x2ds]-px2d[labelled]
+			vel[which_x2ds] = x2d[which_x2ds]-px2d[labelled]
 
 	sc2,labels_out2,vels2 = Label.project_assign(clouds, x3ds, x3ds_labels, Ps, x2d_threshold)
 	assert(np.allclose(sc, sc2))
@@ -86,7 +86,7 @@ def test_project(x3ds, labels_x3d, Ps):
 	'''Project all the 3d points in all the cameras. Clip to ensure that the point is in front of the camera and in the frame.'''
 	numPoints = len(x3ds)
 	numCameras = len(Ps)
-	proj   = np.zeros((numCameras,numPoints,3),dtype=np.float32)
+	proj = np.zeros((numCameras,numPoints,3),dtype=np.float32)
 	for ci,P in enumerate(Ps):
 		np.dot(x3ds,P[:3,:3].T,out=proj[ci])
 		proj[ci] += P[:,3]
@@ -105,8 +105,8 @@ def test_project(x3ds, labels_x3d, Ps):
 
 def test_compute_E(x2ds, splits, Ps):
 	'''Form this equation: E x = e by concatenating the constraints (two rows per ray) and solve for x (remember to divide by -z).
-	[P00 + P20 px, P01 + P21 px, P02 + P22 px][x; y; z] = -[ P03 + P23 px ]
-	[P10 + P20 py, P11 + P21 py, P12 + P22 py]             [ P13 + P23 py ]
+	[P00 + P20 px, P01 + P21 px, P02 + P22 px][x; y; z] = -	[ P03 + P23 px ]
+	[P10 + P20 py, P11 + P21 py, P12 + P22 py]				[ P13 + P23 py ]
 	If the projection matrices are divided through by the focal length then the errors should be 3D-like (ok to mix with 3d equations)
 	Use the same equations to add single ray constraints to IK: derr(x)/dc = E dx/dc; residual = E x - e.'''
 	E = np.zeros((len(x2ds),2,4),dtype=np.float32)
@@ -160,8 +160,8 @@ def solve_camera_from_3d(x3ds, x2ds, P, solve_distortion = False, solve_principa
 		M[2*ci+0] = [x,y,z,1,0,0,0,0,x*px,y*px,z*px,px]
 		M[2*ci+1] = [0,0,0,0,x,y,z,1,x*py,y*py,z*py,py]
 	#M /= np.sum(M*M,axis = -1).reshape(-1,1)**0.5 # for numerics?
-	u,s,vt = np.linalg.svd(M)    # svd is [2N,S]*diag(S)*[S,12]
-	P = vt[-1].reshape(3,4)      # the evec with smallest eval gives the solution
+	u,s,vt = np.linalg.svd(M) # svd is [2N,S]*diag(S)*[S,12]
+	P = vt[-1].reshape(3,4) # the evec with smallest eval gives the solution
 	P /= np.sum(P[2,:3]**2)**0.5 # normalize P
 	# P is only defined up to sign -- the sign could be wrong
 	if np.linalg.det(P[:3,:3]) < 0.0: P = -P
@@ -175,7 +175,7 @@ def solve_camera_from_3d(x3ds, x2ds, P, solve_distortion = False, solve_principa
 	res = np.dot(M,P.reshape(12))
 	print 'pre',(np.mean(res**2)*2)**0.5,
 	for it in range(3):
-		grad_RT = np.array([[0,0,0,0, 0,0,1,0, 0,-1,0,0], [0,0,-1,0, 0,0,0,0, 1,0,0,0],  [0,1,0,0, -1,0,0,0, 0,0,0,0],\
+		grad_RT = np.array([[0,0,0,0, 0,0,1,0, 0,-1,0,0], [0,0,-1,0, 0,0,0,0, 1,0,0,0], [0,1,0,0, -1,0,0,0, 0,0,0,0],\
 				[0,0,0,P[0,0], 0,0,0,P[1,0], 0,0,0,P[2,0]], [0,0,0,P[0,1], 0,0,0,P[1,1], 0,0,0,P[2,1]],\
 				[0,0,0,P[0,2], 0,0,0,P[1,2], 0,0,0,P[2,2]] ],dtype=np.float32) # 6x12
 		dRT = -0.5 * (np.linalg.lstsq(np.dot(M,grad_RT.T), np.dot(M,P.reshape(12)))[0])
@@ -241,7 +241,7 @@ def track_anim(labels_filename, skelDict, rootMat = np.array([[1,0,0,0],[0,1,0,0
 	numDofs = len(skelDict['chanValues'])
 	frameNumbers = np.array(range(first_frame, last_frame,[1,-1][first_frame>last_frame]),dtype=np.int32)
 	numFrames = len(frameNumbers)
-	dofData      = np.zeros((numFrames,numDofs), dtype=np.float32)
+	dofData = np.zeros((numFrames,numDofs), dtype=np.float32)
 
 	# initialise the labels from the pose
 	clouds = ISCV.HashCloud2DList(prev_x2ds, prev_splits, x2d_threshold)
@@ -262,8 +262,7 @@ def track_anim(labels_filename, skelDict, rootMat = np.array([[1,0,0,0],[0,1,0,0
 		prev_u2ds,prev_splits,prev_labels,prev_vels = u2ds,splits,labels,vels
 		SolveIK.unbake_ball_joints(skelDict, Ls_old)
 		dofData[fni,:] = skelDict['chanValues']
-	return { 'dofData'      : dofData,
-			 'frameNumbers' : frameNumbers }
+	return { 'dofData' : dofData, 'frameNumbers' : frameNumbers }
 
 def loadLabels(labels_filename, markerNames, enforce_complete = False):
 	print 'loading labels'
@@ -386,7 +385,7 @@ def test2D(labels_filename, x2d_threshold = 50./2000.):
 				tli = true_lbl[li]
 				pli = test_x2d_labels[li]
 				if pli == -1: # tli != -1 (we didn't give a label)
-					if tli not in prev_lbl:  # ~90% of the misses are here (the marker wasn't seen in that camera on the previous frame)
+					if tli not in prev_lbl: # ~90% of the misses are here (the marker wasn't seen in that camera on the previous frame)
 						bad_score -= 1 # these shouldn't be counted as errors because 'unlabelled' is the right result
 						cases[0] += 1
 					else: # (it should have been labelled, but wasn't)
@@ -402,7 +401,7 @@ def test2D(labels_filename, x2d_threshold = 50./2000.):
 						else: # it could have been labelled ... who stole our label?
 							if tli in test_x2d_labels: # someone
 								cases[4] += 1 # (2.5%)
-							else:                      # no-one!
+							else: # no-one!
 								cases[5] += 1 # (12%)
 					#print 'on frame', fi, 'label', tli,'aka',label_names[tli],'was seen as',pli,'aka',label_names[pli]
 		prev_labels,prev_x2ds,prev_splits,prev_vels = true_labels,x2ds,splits,vels
@@ -524,7 +523,7 @@ def track_anim2(labels_filename, skelDict, rootMat = np.array([[1,0,0,0],[0,1,0,
 
 	frameNumbers = np.array(range(first_frame, last_frame,[1,-1][first_frame>last_frame]),dtype=np.int32)
 	numDofs = len(skelDict['chanValues'])
-	dofData      = np.zeros((len(frameNumbers),numDofs), dtype=np.float32)
+	dofData = np.zeros((len(frameNumbers),numDofs), dtype=np.float32)
 	u2ds, _, splits = Label.extract_label_frame(frameNumbers[0], labels_frames)
 	model = Label.TrackModel(skelDict, effectorLabels, mats, x2d_threshold, pred_2d_threshold, x3d_threshold)
 	model.bootLabels(u2ds,splits)
@@ -667,7 +666,7 @@ def test_label_from_graph(x3ds, M, W, graph, keepHypotheses, penalty, l2x):
 					lj = g2l[gj]
 					pj = h[gj]
 					if pi == -1 or pj == -1: sc += penalty
-					else:                    sc += ((D_pi[pj]-M_li[lj])**2)*W_li[lj]
+					else: sc += ((D_pi[pj]-M_li[lj])**2)*W_li[lj]
 				if sc > thresholdScore: continue
 				hypotheses_out_scores[hypotheses_out_size] = sc
 				hout = hypotheses_out[hypotheses_out_size]
@@ -752,9 +751,9 @@ def test_cam(m,(P,ks,rms),lo_focal_threshold, hi_focal_threshold,cv_2d_threshold
 		return 'due to crazy principal point %s'%(o)
 	return None
 
-def score_and_solve_wands(wand_frames, mats2, camera_solved, rigid_filter = True, solve_cameras = True, error_thresholds = None,
-						  solve_distortion = False, solve_principal_point = False,
-						  lo_focal_threshold = 0.5, hi_focal_threshold = 4.0, cv_2d_threshold = 0.01):
+def score_and_solve_wands(wand_frames, mats2, camera_solved, rigid_filter = True, solve_cameras = True, error_thresholds = None, 
+							solve_distortion = False, solve_principal_point = False,
+							lo_focal_threshold = 0.5, hi_focal_threshold = 4.0, cv_2d_threshold = 0.01):
 	Ps2 = np.array([m[2]/m[0][0,0] for m in mats2],dtype=np.float32)
 	x2s_cameras,x3s_cameras,frames_cameras,num_kept_frames = Calibrate.generate_wand_correspondences(wand_frames, mats2, camera_solved, error_thresholds)
 	print 'kept %d/%d frames'%(num_kept_frames,len(wand_frames))
@@ -963,7 +962,7 @@ def test_calibration(vsk_filename=None, x2d_filename=None, xcp_filename=None):
 		try:
 			field = IO.load('field')[1]
 		except:
-			x2s_cameras,x3s_cameras,frames_cameras,num_kept_frames =  Calibrate.generate_wand_correspondences(wand_frames, vicon_mats, vicon_solved)
+			x2s_cameras,x3s_cameras,frames_cameras,num_kept_frames = Calibrate.generate_wand_correspondences(wand_frames, vicon_mats, vicon_solved)
 			hero_camera = 0
 			frames = frames_cameras[hero_camera]
 			numFrames = len(wand_frames)

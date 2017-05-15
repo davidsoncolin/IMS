@@ -10,8 +10,8 @@ Actions are subscribe and request
 class ReframeClient:
 	def __init__(self, host='localhost', portReq=None, portSub=None, subscriptionFilter='TIMS'):
 		"""
-		:string hostName:   machine name on which server is running
-		:int port:          port number on server to connect to
+		:string hostName: machine name on which server is running
+		:int port: port number on server to connect to
 		"""
 		self.host, self.portSub, self.portReq = host, portSub, portReq
 
@@ -52,25 +52,25 @@ class ReframeClient:
 
 		data = None
 		# while self.client.poll(timeout=0):
-		data = self.client.recv()  # trash the stream until the last frame
+		data = self.client.recv() # trash the stream until the last frame
 
 		frame = None
 		if data != None:
 			frame, _ = IO.unwrap(data)
 			assert (_ == '')
 
-		# if type(frame) == dict:
-		#     frameHash = frame['hash']
-		#     if frameHash != self.stateHash:
-		#         print 'rehashing!'
-		#         data = self.request('self.state[%d]' % frameHash)
-		#         if data == 'fail':
-		#             print 'for some reason, couldn\'t get state for hash ', frameHash
-		#             self.state = None
-		#             self.stateHash = None
-		#         else:
-		#             frameState, _ = IO.unwrap(data)
-		#             self.state = frameState
-		#             self.stateHash = frameState['hash']
+		#if type(frame) == dict:
+			#frameHash = frame['hash']
+			#if frameHash != self.stateHash:
+				#print 'rehashing!'
+				#data = self.request('self.state[%d]' % frameHash)
+				#if data == 'fail':
+					#print 'for some reason, couldn\'t get state for hash ', frameHash
+					#self.state = None
+					#self.stateHash = None
+				#else:
+					#frameState, _ = IO.unwrap(data)
+					#self.state = frameState
+					#self.stateHash = frameState['hash']
 
 		return frame

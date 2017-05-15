@@ -372,8 +372,8 @@ def testIntersects(neighbours, neighbouringNormals, triangleNormal, points, tria
 	return False
 
 def scoreTriangle(triangle, registry, x3ds, labels, rayNormals, rayNormalsDp, cache, triangleNormal=None,
-				  threshold_neighbourNorm=0.4, threshold_rayAgreement=0.3, threshold_normalRayAgreement=0.3,
-				  minAngleRels=25, forgiving=False, verbose=True):
+				threshold_neighbourNorm=0.4, threshold_rayAgreement=0.3, threshold_normalRayAgreement=0.3,
+				minAngleRels=25, forgiving=False, verbose=True):
 	import hashlib
 	global scores
 
@@ -400,8 +400,8 @@ def scoreTriangle(triangle, registry, x3ds, labels, rayNormals, rayNormalsDp, ca
 	# scoreHash = hashlib.sha224(scoreIdentifier).hexdigest()
 	# if scoreHash not in scores:
 	score = _scoreTriangle(triangle, registry, x3ds, labels, rayNormals, rayNormalsDp, cache, triangleNormal,
-						   threshold_neighbourNorm, threshold_rayAgreement, threshold_normalRayAgreement,
-						   minAngleRels, forgiving, verbose, sortedTriangle)
+						threshold_neighbourNorm, threshold_rayAgreement, threshold_normalRayAgreement,
+						minAngleRels, forgiving, verbose, sortedTriangle)
 
 	if score is None:
 		return None, None, None
@@ -414,8 +414,8 @@ def scoreTriangle(triangle, registry, x3ds, labels, rayNormals, rayNormalsDp, ca
 	return triangle, triangleNormal, score
 
 def _scoreTriangle(triangle, registry, x3ds, labels, rayNormals, rayNormalsDp, cache, triangleNormal=None,
-				  threshold_neighbourNorm=0.4, threshold_rayAgreement=0.3, threshold_normalRayAgreement=0.3,
-				  minAngleRels=25, forgiving=False, verbose=True, sortedTriangle=None):
+				threshold_neighbourNorm=0.4, threshold_rayAgreement=0.3, threshold_normalRayAgreement=0.3,
+				minAngleRels=25, forgiving=False, verbose=True, sortedTriangle=None):
 	import itertools
 	global scores
 
@@ -614,9 +614,9 @@ def processPoint(point, edges, x3ds, maxDistThreshold, minDistThreshold, triangl
 			edges.add((point, candidate))
 
 def processEdges(edges, triangles, x3ds, x3ds_labels, maxDistThreshold, minDistThreshold,
-				 rayNormals, rayNormalsDp, cache, registry,
-				 threshold_neighbourNorm=0.25, threshold_rayAgreement=0.25, threshold_normalRayAgreement=0.25,
-				 its=0, usedIdx=None, labellingData=None, forgiving=False, maxIts=10):
+				rayNormals, rayNormalsDp, cache, registry,
+				threshold_neighbourNorm=0.25, threshold_rayAgreement=0.25, threshold_normalRayAgreement=0.25,
+				its=0, usedIdx=None, labellingData=None, forgiving=False, maxIts=10):
 	global processedEdges
 	for edge in edges:
 		edgeKey = np.array_str(np.sort(x3ds_labels[list(edge)]))
@@ -755,9 +755,9 @@ def processTriangle(triangle, triangles, x3ds, x3ds_labels, rayNormals, rayNorma
 					if np.linalg.norm(x3ds[e0] - x3ds[e1]) > 75.0: continue
 					rayCand = rayNormals[triangleCandidate] if rayNormals is not None else None
 					newTriangle, triangleNormal, score = scoreTriangle(triangleCandidate, registry, x3ds, x3ds_labels,
-																	   rayCand, rayNormalsDp,
-																	   cache, None, 0.0, 0.0, 0.0, forgiving=True)
-																	   # cache, None, 0.0, -0.25, -0.25, forgiving=True)
+																	rayCand, rayNormalsDp,
+																	cache, None, 0.0, 0.0, 0.0, forgiving=True)
+																	# cache, None, 0.0, -0.25, -0.25, forgiving=True)
 					if newTriangle:
 						if cache.addTriangle(newTriangle, triangleNormal, triangles, x3ds_labels):
 							processedCandidates.append(newTriangle)
@@ -768,7 +768,7 @@ def processTriangle(triangle, triangles, x3ds, x3ds_labels, rayNormals, rayNorma
 
 	if labellingData is None:
 		processEdges(edges, triangles, x3ds, x3ds_labels, maxDistThreshold, minDistThreshold, rayNormals, rayNormalsDp,
-					 cache, registry, 0.2, -0.16, -0.16, its, usedIdx=usedIdx, forgiving=forgiving, maxIts=maxIts)
+					cache, registry, 0.2, -0.16, -0.16, its, usedIdx=usedIdx, forgiving=forgiving, maxIts=maxIts)
 
 
 def createTriangles(x3ds_means, x3ds_labels, rayNormals, usedIdx=None, forgiving=False, maxIts=10):
@@ -788,6 +788,6 @@ def createTriangles(x3ds_means, x3ds_labels, rayNormals, usedIdx=None, forgiving
 		processPoint(point, edges, x3ds_means, 50.0, 25.0, usedIdx=usedIdx)
 
 	processEdges(edges, triangles, x3ds_means, x3ds_labels, 50.0, 25.0, rayNormals, rayNormalsDp,
-				 cache, registry, forgiving=forgiving, maxIts=maxIts)
+				cache, registry, forgiving=forgiving, maxIts=maxIts)
 
 	return np.int32(triangles)

@@ -305,8 +305,8 @@ class UpdateMarkerMeshFromSkeleton(Op.Op):
 		if location not in self.effectorData: self.effectorData[location] = SolveIK.make_effectorData(skelDict_source)
 		if location not in self.effectorLabels: self.effectorLabels[location] = np.array([int(mn) for mn in skelDict_source['markerNames']], dtype=np.int32)
 		vs, vs_labels = SolveIK.skeleton_marker_positions(skelDict_source, skelDict_source['rootMat'], skelDict_source['chanValues'],
-														  self.effectorLabels[location], self.effectorData[location],
-														  markerWeights=markerWeights)
+														self.effectorLabels[location], self.effectorData[location],
+														markerWeights=markerWeights)
 
 		interface.setAttr('vs', [vs])
 		interface.setAttr('vs_labels', [vs_labels])
@@ -512,83 +512,83 @@ Colours should be used in order.
 '''
 
 kelly_colors_hex = [
-    0xFFFFFF, # White
-    0x000000, # Black
-    0xFFB300, # Vivid Yellow
-    0x803E75, # Strong Purple
-    0xFF6800, # Vivid Orange
-    0xA6BDD7, # Very Light Blue
-    0xC10020, # Vivid Red
-    0xCEA262, # Grayish Yellow
-    0x817066, # Medium Gray
+	0xFFFFFF, # White
+	0x000000, # Black
+	0xFFB300, # Vivid Yellow
+	0x803E75, # Strong Purple
+	0xFF6800, # Vivid Orange
+	0xA6BDD7, # Very Light Blue
+	0xC10020, # Vivid Red
+	0xCEA262, # Grayish Yellow
+	0x817066, # Medium Gray
 
-    # The following don't work well for people with defective color vision
-    0x007D34, # Vivid Green
-    0xF6768E, # Strong Purplish Pink
-    0x00538A, # Strong Blue
-    0xFF7A5C, # Strong Yellowish Pink
-    0x53377A, # Strong Violet
-    0xFF8E00, # Vivid Orange Yellow
-    0xB32851, # Strong Purplish Red
-    0xF4C800, # Vivid Greenish Yellow
-    0x7F180D, # Strong Reddish Brown
-    0x93AA00, # Vivid Yellowish Green
-    0x593315, # Deep Yellowish Brown
-    0xF13A13, # Vivid Reddish Orange
-    0x232C16, # Dark Olive Green
-    ]
+	# The following don't work well for people with defective color vision
+	0x007D34, # Vivid Green
+	0xF6768E, # Strong Purplish Pink
+	0x00538A, # Strong Blue
+	0xFF7A5C, # Strong Yellowish Pink
+	0x53377A, # Strong Violet
+	0xFF8E00, # Vivid Orange Yellow
+	0xB32851, # Strong Purplish Red
+	0xF4C800, # Vivid Greenish Yellow
+	0x7F180D, # Strong Reddish Brown
+	0x93AA00, # Vivid Yellowish Green
+	0x593315, # Deep Yellowish Brown
+	0xF13A13, # Vivid Reddish Orange
+	0x232C16, # Dark Olive Green
+	]
 
 kelly_colors_rgb = [
-    [255, 255, 255], # White
-    [0, 0, 0], # Black
-    [1, 179, 0], # Vivid Yellow
-    [128, 62, 117], # Strong Purple
-    [255, 104, 0], # Vivid Orange
-    [166, 189, 215], # Very Light Blue
-    [193, 0, 32], # Vivid Red
-    [206, 162, 98], # Grayish Yellow
-    [129, 112, 102], # Medium Gray
+	[255, 255, 255], # White
+	[0, 0, 0], # Black
+	[1, 179, 0], # Vivid Yellow
+	[128, 62, 117], # Strong Purple
+	[255, 104, 0], # Vivid Orange
+	[166, 189, 215], # Very Light Blue
+	[193, 0, 32], # Vivid Red
+	[206, 162, 98], # Grayish Yellow
+	[129, 112, 102], # Medium Gray
 
-    # these aren't good for people with defective color vision:
-    [0, 125, 52], # Vivid Green
-    [246, 118, 142], #Strong Purplish Pink
-    [0, 83, 138], # Strong Blue
-    [255, 122, 92], # Strong Yellowish Pink
-    [83, 55, 122], # Strong Violet
-    [255, 142, 0], # Vivid Orange Yellow
-    [179, 40, 81], # Strong Purplish Red
-    [244, 200, 0], # Vivid Greenish Yellow
-    [127, 24, 13], # Strong Reddish Brown
-    [147, 170, 0], # Vivid Yellowish Green
-    [89, 51, 21], # Deep Yellowish Brown
-    [241, 58, 19], # Vivid Reddish Orange
-    [35, 44, 22] # Dark Olive Green
+	# these aren't good for people with defective color vision:
+	[0, 125, 52], # Vivid Green
+	[246, 118, 142], #Strong Purplish Pink
+	[0, 83, 138], # Strong Blue
+	[255, 122, 92], # Strong Yellowish Pink
+	[83, 55, 122], # Strong Violet
+	[255, 142, 0], # Vivid Orange Yellow
+	[179, 40, 81], # Strong Purplish Red
+	[244, 200, 0], # Vivid Greenish Yellow
+	[127, 24, 13], # Strong Reddish Brown
+	[147, 170, 0], # Vivid Yellowish Green
+	[89, 51, 21], # Deep Yellowish Brown
+	[241, 58, 19], # Vivid Reddish Orange
+	[35, 44, 22] # Dark Olive Green
 ]
 
 kelly_colors = dict(white=(255, 255, 255),
-                    black=(0, 0, 0),
-                    vivid_yellow=(255, 179, 0),
-                    strong_purple=(128, 62, 117),
-                    vivid_orange=(255, 104, 0),
-                    very_light_blue=(166, 189, 215),
-                    vivid_red=(193, 0, 32),
-                    grayish_yellow=(206, 162, 98),
-                    medium_gray=(129, 112, 102),
+					black=(0, 0, 0),
+					vivid_yellow=(255, 179, 0),
+					strong_purple=(128, 62, 117),
+					vivid_orange=(255, 104, 0),
+					very_light_blue=(166, 189, 215),
+					vivid_red=(193, 0, 32),
+					grayish_yellow=(206, 162, 98),
+					medium_gray=(129, 112, 102),
 
-                    # these aren't good for people with defective color vision:
-                    vivid_green=(0, 125, 52),
-                    strong_purplish_pink=(246, 118, 142),
-                    strong_blue=(0, 83, 138),
-                    strong_yellowish_pink=(255, 122, 92),
-                    strong_violet=(83, 55, 122),
-                    vivid_orange_yellow=(255, 142, 0),
-                    strong_purplish_red=(179, 40, 81),
-                    vivid_greenish_yellow=(244, 200, 0),
-                    strong_reddish_brown=(127, 24, 13),
-                    vivid_yellowish_green=(147, 170, 0),
-                    deep_yellowish_brown=(89, 51, 21),
-                    vivid_reddish_orange=(241, 58, 19),
-                    dark_olive_green=(35, 44, 22))
+					# these aren't good for people with defective color vision:
+					vivid_green=(0, 125, 52),
+					strong_purplish_pink=(246, 118, 142),
+					strong_blue=(0, 83, 138),
+					strong_yellowish_pink=(255, 122, 92),
+					strong_violet=(83, 55, 122),
+					vivid_orange_yellow=(255, 142, 0),
+					strong_purplish_red=(179, 40, 81),
+					vivid_greenish_yellow=(244, 200, 0),
+					strong_reddish_brown=(127, 24, 13),
+					vivid_yellowish_green=(147, 170, 0),
+					deep_yellowish_brown=(89, 51, 21),
+					vivid_reddish_orange=(241, 58, 19),
+					dark_olive_green=(35, 44, 22))
 
 
 class DisplayShapeWeightGroups(Op.Op):
@@ -674,7 +674,7 @@ class DisplayJointMarkerMapping(Op.Op):
 
 class ProcLOD(Op.Op):
 	def __init__(self, name='/Proc LOD', locations='', colour=(0.6, 0.1, 0.6, 0.4), renderLod=False, displayNormals=False,
-	             neighbours=2, jointHeightMult=1.1):
+				neighbours=2, jointHeightMult=1.1):
 		fields = [
 			('name', 'name', 'Name', 'string', name, {}),
 			('locations', 'Skeleton locations', 'Locations', 'string', locations, {}),
@@ -887,7 +887,7 @@ class ExportMarkerMesh(Op.Op):
 
 class SphericalPoints(Op.Op):
 	def __init__(self, name='/Spherical Points', locations='/root/sphere', numPoints=80, radius=500., seed=0,
-	             displayNormals=False, pointSize=10., colour=(0.6, 0.1, 0.6, 0.4)):
+				displayNormals=False, pointSize=10., colour=(0.6, 0.1, 0.6, 0.4)):
 		fields = [
 			('name', 'name', 'Name', 'string', name, {}),
 			('locations', 'Skeleton locations', 'Locations', 'string', locations, {}),

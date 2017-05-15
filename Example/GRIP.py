@@ -44,11 +44,11 @@ JOINT_NO = 'Not Set'
 SWIZZLE_NO = 'No Swizzle'
 SWIZZLE_CUSTOM = 'Custom'
 DEFAULT_SWIZZLES = {SWIZZLE_NO: np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=np.float32),
-                    '+z+x+y': np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]], dtype=np.float32),
-                    '-y-x-z': np.array([[0, -1, 0], [-1, 0, 0], [0, 0, -1]], dtype=np.float32),
-                    '+x-y-z': np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]], dtype=np.float32),
-                    '-y-z+x': np.array([[0, -1, 0], [0, 0, -1], [1, 0, 0]], dtype=np.float32),
-                    '+z-x-y': np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]], dtype=np.float32)}
+					'+z+x+y': np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]], dtype=np.float32),
+					'-y-x-z': np.array([[0, -1, 0], [-1, 0, 0], [0, 0, -1]], dtype=np.float32),
+					'+x-y-z': np.array([[1, 0, 0], [0, -1, 0], [0, 0, -1]], dtype=np.float32),
+					'-y-z+x': np.array([[0, -1, 0], [0, 0, -1], [1, 0, 0]], dtype=np.float32),
+					'+z-x-y': np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]], dtype=np.float32)}
 assert(all([s is None or np.linalg.det(s)==1 for s in DEFAULT_SWIZZLES.values()]))
 
 templateObjectData = {'name':'object',
@@ -57,25 +57,16 @@ templateObjectData = {'name':'object',
 		'draw':True,
 		'visible':True}
 
-def updateHackyDeformer(skel_dict):
-	global G_Hack_lattice
-	if G_Hack_lattice is None:
-		filename = 'D:\Documents\lattice_Hack.hack'
-		mappings = IO.load(filename)[1]['mappings']
-		G_Hack_lattice = Base_Deformer.CubeDeformer('Hack', skel_dict, mappings)
-	else:
-		G_Hack_lattice.skel_dict = skel_dict
-
 def addRTGKey(outliner, rtg_key, name, affected_objs):
 	global G_All_Things, G_RTG_Keys
 	G_RTG_Keys.append(rtg_key)
 	print "Adding Key: {}\nRTG_Keys: {}".format(rtg_key, G_RTG_Keys)
 	G_All_Things[rtg_key] = {'objecttype':RETARGET_TYPE,
-							 'data':{'name':name,
-									 'rtg_key':rtg_key,
-									 'children':[]
-									 }
-							 }
+							'data':{'name':name,
+									'rtg_key':rtg_key,
+									'children':[]
+									}
+							}
 	outliner.model.add(G_All_Things[rtg_key])
 	for obj in affected_objs:
 		if 'rtg' not in obj['data']:
@@ -513,20 +504,20 @@ def setupMapping(rtg_key):
 	rtg_X = atdict(getFromState(rtg_key, 'attrs/X'))
 	for en, lat_en, lattice, perts, tn, jn, jo, cn, wp, wo, js in zip(getIKEnabled(rtg_IK_Passes,rtg_IK_Order),getIKLatEnabled(rtg_IK_Passes,rtg_IK_Order),
 															getIKDeformerMappings(rtg_IK_Passes,rtg_IK_Order),
-														  getIKPertData(rtg_IK_Passes,rtg_IK_Order),getEffectorTargetNames(rtg_IK_Passes,rtg_IK_Order),
+														getIKPertData(rtg_IK_Passes,rtg_IK_Order),getEffectorTargetNames(rtg_IK_Passes,rtg_IK_Order),
 												getEffectorJointNames(rtg_IK_Passes,rtg_IK_Order),getEffectorTargetOffsets(rtg_IK_Passes,rtg_IK_Order),
 												getJointCutoffNames(rtg_IK_Passes,rtg_IK_Order),getIKWeightsPosition(rtg_IK_Passes,rtg_IK_Order),
 												getIKWeightsOrientation(rtg_IK_Passes,rtg_IK_Order),getJointStiffness(rtg_IK_Passes,rtg_IK_Order)):
 		if not en: continue
-		effectorJoints = np.array([rtg_targetSkeleton.jointIndex[tn]], dtype=np.int32)  # T root
+		effectorJoints = np.array([rtg_targetSkeleton.jointIndex[tn]], dtype=np.int32) # T root
 		numEffectors = len(effectorJoints)
 		effectorOffsets = np.zeros((numEffectors, 3, 4), dtype=np.float32)
 		effectorWeights = np.zeros((numEffectors, 3, 4), dtype=np.float32)
-		for eo in effectorOffsets[:, :, :3]: eo[:] = jo[:, :3].T * rtg_X.s  # take into account the target scale!
+		for eo in effectorOffsets[:, :, :3]: eo[:] = jo[:, :3].T * rtg_X.s # take into account the target scale!
 		effectorOffsets[:, :, 3] = 0
 		if jo.shape[1] == 4: effectorOffsets[:, :, 3] = jo[:, 3]
-		effectorWeights[:, :, :3] = wo  # orientation
-		effectorWeights[:, :, 3] = wp  # position
+		effectorWeights[:, :, :3] = wo # orientation
+		effectorWeights[:, :, 3] = wp # position
 		usedChannels, (usedCAEs, usedCAEsSplits) = SolveIK.computeChannelAffectedEffectors(rtg_targetSkeleton.jointIndex[cn],
 																							rtg_targetSkeleton.jointParents,
 																							rtg_targetSkeleton.jointChanSplits,
@@ -607,7 +598,7 @@ def retargetSelected(outliner, retarget_widget):
 		errorDialog("Select a source and target", "Select a source with no motion and a target with motion")
 		return
 	if all([x['animDict'] for x in G_Selection]):
-		errorDialog("Can't overwrite motion","Both selected items have motion.  Please select a motion and a skeleton")
+		errorDialog("Can't overwrite motion","Both selected items have motion. Please select a motion and a skeleton")
 		return
 	# rtg_key = retarget_widget.rtg_key
 	# if rtg_key is not None:
@@ -647,7 +638,7 @@ def retargetSelected(outliner, retarget_widget):
 
 # @profile
 def frameCallback(win, frame):
-	global  G_Moving_Things, G_RTG_Dicts, G_RTG_Keys
+	global G_Moving_Things, G_RTG_Dicts, G_RTG_Keys
 	for m in G_Moving_Things:
 		# what happens if there are gaps in the frameNumbers? too much of an edge case?
 		# i've cast the animDict['frameNumbers'] to a set so i can do a faster 'in'
@@ -659,7 +650,7 @@ def frameCallback(win, frame):
 			continue
 		draw_frame = (frame % animDict['maxFrame']) - m['startIndex']
 		dofs = animDict['dofData'][draw_frame]
-		m['data'][K_DRAW] = True  # ensure that it draws
+		m['data'][K_DRAW] = True # ensure that it draws
 		Character.pose_skeleton(skelDict['Gs'], skelDict, dofs, m['rootMat'])
 		glSkel.setPose(skelDict['Gs'])
 	# TODO get parallel working. Currently too much reference to external data which could cause issues
@@ -696,23 +687,11 @@ def apply_retarget(frame, rtg_dict, char_set):
 	rtg_sourceSkeleton.chanValues[:] = rtg_srcAnim[frame % len(rtg_srcAnim)]
 	Character.pose_skeleton(rtg_sourceSkeleton['Gs'], rtg_sourceSkeleton, rtg_sourceSkeleton.chanValues)
 
-	# SPINE DATA
-	# reg_ex = re.compile('VSS_Spine[0-9]*$')
-	# spine_joints = [(x,i) for i, x in enumerate(rtg_sourceSkeleton['jointNames']) if reg_ex.match(x)]
-	# spine_splits = [(rtg_sourceSkeleton['jointChanSplits'][2*i+1],rtg_sourceSkeleton['jointChanSplits'][2*(i+1)]) for (_,i) in spine_joints]
-	# spine_chan_values = [[rtg_sourceSkeleton['chanValues'][z] for z in xrange(x,y)] for (x,y) in spine_splits]
-	# print spine_joints
-	# print spine_splits
-	# print spine_chan_values
-	# f = open('C:/Python/Spine_data.txt','a')
-	# f.write(str(spine_chan_values)+'\n')
-	# f.close()
-	# END SPINE DATA
 
 	rtg_targetSkeleton.chanValues[:] = 0
 	if rtg_copyPass and rtg_copyPass['enabled'] and rtg_copyPass['copyData'] <> []:
 		Retarget.copy_joints(rtg_sourceSkeleton, rtg_targetSkeleton, rtg_copyPass['copyData']) #, positionOffsets=rtg_copyPass.get('positionOffsets',np.zeros(rtg_targetSkeleton.numChans, dtype=np.float32)))
-	if False: rtg_targetSkeleton.chanValues[1] += rtg_targetOffsetY  # make the target character's root be 150mm lower than the source
+	if False: rtg_targetSkeleton.chanValues[1] += rtg_targetOffsetY # make the target character's root be 150mm lower than the source
 	if True and rtg_data:
 		Ls_old = SolveIK.bake_ball_joints(rtg_targetSkeleton)
 		for effectorData, effectorTargetJoints, lattice, perturbations in rtg_data:
@@ -743,7 +722,7 @@ def apply_retarget(frame, rtg_dict, char_set):
 		G_All_Things[rtg_targetObject]['primitive'].setPose(rtg_targetSkeleton['Gs'])
 		if 'geom' in G_All_Things[rtg_targetObject]:
 			poseGeom(G_All_Things[rtg_targetObject]['geom'],rtg_targetSkeleton,
-					 G_All_Things[rtg_targetObject]['shape_weights'])
+					G_All_Things[rtg_targetObject]['shape_weights'])
 
 def applyLattice(points, lattice):
 	return lattice.deformPoints(points)
@@ -860,7 +839,7 @@ def fileImport(caller, outliner, timeline, filename, newKey = None, block_update
 			new = addSkel(loadSkel(filename), filename, newKey, caller)
 		# TODO: fix assumption that there's a skel or asf with matching name to the anim/amc
 		elif filename.endswith('anim'):
-			animDict = IO.load(filename)[1]  #filename.replace('.anim', '.skel'))[1]
+			animDict = IO.load(filename)[1] #filename.replace('.anim', '.skel'))[1]
 			skelDict = loadSkel(filename.replace('.anim', '.skel'))
 			new = addMotion(skelDict, animDict, filename, newKey, caller, timeline)
 		elif filename.endswith('amc'):
@@ -895,7 +874,7 @@ def fileImport(caller, outliner, timeline, filename, newKey = None, block_update
 def parseMayaFile(filename):
 	objs,nodeLists = MAReader.read_MA(filename)
 	primitives,primitives2D,mats,camera_ids,movies, skels, \
-        shape_weights, fields, dobjs = MAReader.maya_to_state(objs,nodeLists, use_State=False)
+		shape_weights, fields, dobjs = MAReader.maya_to_state(objs,nodeLists, use_State=False)
 	assert len(primitives) == 1, "Error: Currently only supports one mesh per file."
 	maPrimitive = primitives[0]
 	skelDict = skels[0]
@@ -990,8 +969,8 @@ def addSkel(skelDict, filename, newKey, caller, geom = None):
 		glSkel = GLMeshes(names=Names,verts=Vs,faces=Faces,bones=Bones,transforms=Ts)
 		# glSkel = GLSkel(skelDict['Bs'], skelDict['Gs'])
 	except Exception:
-		import pprint;pprint.pprint(skelDict)  #.keys()
-		LOG.error("Failed making GLSkel from skeldict.  Bad skel file %s?" % filename, exc_info=True)
+		import pprint;pprint.pprint(skelDict) #.keys()
+		LOG.error("Failed making GLSkel from skeldict. Bad skel file %s?" % filename, exc_info=True)
 		errorDialog("Error Importing...", 'Failed to read skeleton data',
 				traceback.format_exc())
 		return
@@ -1008,8 +987,8 @@ def addSkel(skelDict, filename, newKey, caller, geom = None):
 	new['primitive'] = glSkel
 	if geom is not None:
 		geom_mesh = GLMeshes(names=geom['Names'],verts=geom['Vs'],
-							 faces=geom['Faces'],bones=geom['Bs'],
-							 transforms=geom['Ts'])
+							faces=geom['Faces'],bones=geom['Bs'],
+							transforms=geom['Ts'])
 		new['geom'] = geom_mesh
 		new['shape_weights'] = geom['shape_weights']
 		caller.view().primitives.append(geom_mesh)
@@ -1041,7 +1020,7 @@ def deleteRetarget(rtg_key, outliner, retargeter, refresh=True):
 					obj['primitive'].setPose(rtg_targetSkeleton['Gs'])
 					try:
 						poseGeom(G_All_Things[rtg_targetObject]['geom'],rtg_targetSkeleton,
-						 G_All_Things[rtg_targetObject]['shape_weights'])
+						G_All_Things[rtg_targetObject]['shape_weights'])
 					except KeyError:
 						pass # No Geometry associated
 		elif obj['objecttype'] == RETARGET_TYPE and rtg_key == obj['data']['rtg_key']:
@@ -1190,8 +1169,8 @@ def setLoadingText(caller,status):
 	if status:
 		x, y = caller.view().width, caller.view().height
 		caller.view().displayText = [{'x':x/2,'y':y/2,'s':'Loading...',
-									 'font':GLUT.GLUT_BITMAP_TIMES_ROMAN_24,
-									  'color':(1.,0.,0.)}]
+									'font':GLUT.GLUT_BITMAP_TIMES_ROMAN_24,
+									'color':(1.,0.,0.)}]
 	else:
 		caller.view().displayText = []
 	caller.updateGL()
@@ -1243,9 +1222,6 @@ def retargeterLoad(caller, outliner, retargeter, timeline):
 				outliner.model.add(new)
 		if obj_type == FILE_TYPE:
 			filename = obj['attrs']['path']
-			if not os.path.exists(filename):
-				start_bit = filename.find('ExampleData')
-				filename = 'D:/' + filename[start_bit:]
 			fileImport(caller,outliner,timeline,filename,newKey=key)
 		if obj_type == RETARGET_TYPE:
 			retarget_keys.append(key)
@@ -1315,5 +1291,5 @@ def redo(caller, retarget_panel, outliner, timeline):
 
 
 if __name__ == "__main__":
-	from UI import GRetargetUI
+	import GRetargetUI
 	GRetargetUI.main()

@@ -31,10 +31,10 @@ def viconConnect(HostName='localhost:801', TransmitMulticast=False):
 	MyClient.EnableUnlabeledMarkerData()
 	MyClient.EnableDeviceData()
 
-	print "Segment Data Enabled: "         , AdaptBool[MyClient.IsSegmentDataEnabled().Enabled]
-	print "Marker Data Enabled: "          , AdaptBool[MyClient.IsMarkerDataEnabled().Enabled]
+	print "Segment Data Enabled: ", AdaptBool[MyClient.IsSegmentDataEnabled().Enabled]
+	print "Marker Data Enabled: ", AdaptBool[MyClient.IsMarkerDataEnabled().Enabled]
 	print "Unlabeled Marker Data Enabled: ", AdaptBool[MyClient.IsUnlabeledMarkerDataEnabled().Enabled]
-	print "Device Data Enabled: "          , AdaptBool[MyClient.IsDeviceDataEnabled().Enabled]
+	print "Device Data Enabled: ", AdaptBool[MyClient.IsDeviceDataEnabled().Enabled]
 
 	# Set the streaming mode
 	MyClient.SetStreamMode( PyViconDataStream.StreamMode.ClientPull )
@@ -42,7 +42,7 @@ def viconConnect(HostName='localhost:801', TransmitMulticast=False):
 	# MyClient.SetStreamMode( PyViconDataStream.StreamMode.ServerPush )
 
 	# Set the global up axis
-	MyClient.SetAxisMapping( PyViconDataStream.Direction.Forward, PyViconDataStream.Direction.Left,  PyViconDataStream.Direction.Up )
+	MyClient.SetAxisMapping( PyViconDataStream.Direction.Forward, PyViconDataStream.Direction.Left, PyViconDataStream.Direction.Up )
 
 	_Output_GetAxisMapping = MyClient.GetAxisMapping()
 	print "Axis Mapping: X-", AdaptDirection[_Output_GetAxisMapping.XAxis], \
@@ -72,16 +72,16 @@ def viconReadFrame(MyClient):
 	print "Frame Number: ", _Output_GetFrameNumber.FrameNumber
 
 	# Get the timecode
-	_Output_GetTimecode  = MyClient.GetTimecode()
+	_Output_GetTimecode = MyClient.GetTimecode()
 
-	print "Timecode: ", _Output_GetTimecode.Hours    , "h " \
-			, _Output_GetTimecode.Minutes            , "m " \
-			, _Output_GetTimecode.Seconds            , "s " \
-			, _Output_GetTimecode.Frames             , "f " \
-			, _Output_GetTimecode.SubFrame           , "sf "\
-			, AdaptBool[_Output_GetTimecode.FieldFlag ]  , " "  \
-			, _Output_GetTimecode.Standard           , " "  \
-			, _Output_GetTimecode.SubFramesPerFrame  , " "  \
+	print "Timecode: ", _Output_GetTimecode.Hours, "h " \
+			, _Output_GetTimecode.Minutes, "m " \
+			, _Output_GetTimecode.Seconds, "s " \
+			, _Output_GetTimecode.Frames, "f " \
+			, _Output_GetTimecode.SubFrame, "sf "\
+			, AdaptBool[_Output_GetTimecode.FieldFlag ], " "\
+			, _Output_GetTimecode.Standard, " "\
+			, _Output_GetTimecode.SubFramesPerFrame, " "\
 			, _Output_GetTimecode.UserBits
 
 	# Get the latency
@@ -89,7 +89,7 @@ def viconReadFrame(MyClient):
 
 	for LatencySampleIndex in range(MyClient.GetLatencySampleCount().Count):
 
-		SampleName  = MyClient.GetLatencySampleName( LatencySampleIndex ).Name
+		SampleName = MyClient.GetLatencySampleName( LatencySampleIndex ).Name
 		SampleValue = MyClient.GetLatencySampleValue( SampleName ).Value
 
 		print "  ", SampleName, " ", SampleValue, "s"
@@ -141,120 +141,120 @@ def viconReadFrame(MyClient):
 
 			# Get the static segment rotation in helical co-ordinates
 			_Output_GetSegmentStaticRotationHelical = MyClient.GetSegmentStaticRotationHelical( SubjectName, SegmentName )
-			print "        Static Rotation Helical: (", _Output_GetSegmentStaticRotationHelical.Rotation[ 0 ]    , ", " \
-															, _Output_GetSegmentStaticRotationHelical.Rotation[ 1 ]    , ", " \
-															, _Output_GetSegmentStaticRotationHelical.Rotation[ 2 ]    , ") "
+			print "        Static Rotation Helical: (", _Output_GetSegmentStaticRotationHelical.Rotation[ 0 ], ", " \
+															, _Output_GetSegmentStaticRotationHelical.Rotation[ 1 ], ", " \
+															, _Output_GetSegmentStaticRotationHelical.Rotation[ 2 ], ") "
 
 			# Get the static segment rotation as a matrix
 			_Output_GetSegmentStaticRotationMatrix = MyClient.GetSegmentStaticRotationMatrix( SubjectName, SegmentName )
-			print "        Static Rotation Matrix: ("   , _Output_GetSegmentStaticRotationMatrix.Rotation[ 0 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 1 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 2 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 3 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 4 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 5 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 6 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 7 ]    , ", " \
-														, _Output_GetSegmentStaticRotationMatrix.Rotation[ 8 ]    , ") "
+			print "        Static Rotation Matrix: (", _Output_GetSegmentStaticRotationMatrix.Rotation[ 0 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 1 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 2 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 3 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 4 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 5 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 6 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 7 ], ", " \
+													, _Output_GetSegmentStaticRotationMatrix.Rotation[ 8 ], ") "
 
 			# Get the static segment rotation in quaternion co-ordinates
 			_Output_GetSegmentStaticRotationQuaternion = MyClient.GetSegmentStaticRotationQuaternion( SubjectName, SegmentName )
-			print "        Static Rotation Quaternion: (", _Output_GetSegmentStaticRotationQuaternion.Rotation[ 0 ]    , ", " \
-																, _Output_GetSegmentStaticRotationQuaternion.Rotation[ 1 ]    , ", " \
-																, _Output_GetSegmentStaticRotationQuaternion.Rotation[ 2 ]    , ", " \
-																, _Output_GetSegmentStaticRotationQuaternion.Rotation[ 3 ]    , ") "
+			print "        Static Rotation Quaternion: (", _Output_GetSegmentStaticRotationQuaternion.Rotation[ 0 ], ", " \
+																, _Output_GetSegmentStaticRotationQuaternion.Rotation[ 1 ], ", " \
+																, _Output_GetSegmentStaticRotationQuaternion.Rotation[ 2 ], ", " \
+																, _Output_GetSegmentStaticRotationQuaternion.Rotation[ 3 ], ") "
 
 			# Get the static segment rotation in EulerXYZ co-ordinates
 			_Output_GetSegmentStaticRotationEulerXYZ = MyClient.GetSegmentStaticRotationEulerXYZ( SubjectName, SegmentName )
-			print "        Static Rotation EulerXYZ: (", _Output_GetSegmentStaticRotationEulerXYZ.Rotation[ 0 ]    , ", " \
-																, _Output_GetSegmentStaticRotationEulerXYZ.Rotation[ 1 ]    , ", " \
-																, _Output_GetSegmentStaticRotationEulerXYZ.Rotation[ 2 ]    , ") "
+			print "        Static Rotation EulerXYZ: (", _Output_GetSegmentStaticRotationEulerXYZ.Rotation[ 0 ], ", " \
+																, _Output_GetSegmentStaticRotationEulerXYZ.Rotation[ 1 ], ", " \
+																, _Output_GetSegmentStaticRotationEulerXYZ.Rotation[ 2 ], ") "
 
 			# Get the global segment translation
 			_Output_GetSegmentGlobalTranslation = MyClient.GetSegmentGlobalTranslation( SubjectName, SegmentName )
 			print "        Global Translation: (", _Output_GetSegmentGlobalTranslation.Translation[ 0 ] , ", " \
-														, _Output_GetSegmentGlobalTranslation.Translation[ 1 ] , ", " \
-														, _Output_GetSegmentGlobalTranslation.Translation[ 2 ] , ") " \
-														, AdaptBool[_Output_GetSegmentGlobalTranslation.Occluded ]
+												, _Output_GetSegmentGlobalTranslation.Translation[ 1 ] , ", " \
+												, _Output_GetSegmentGlobalTranslation.Translation[ 2 ] , ") " \
+												, AdaptBool[_Output_GetSegmentGlobalTranslation.Occluded ]
 
 			# Get the global segment rotation in helical co-ordinates
 			_Output_GetSegmentGlobalRotationHelical = MyClient.GetSegmentGlobalRotationHelical( SubjectName, SegmentName )
-			print "        Global Rotation Helical: (", _Output_GetSegmentGlobalRotationHelical.Rotation[ 0 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationHelical.Rotation[ 1 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationHelical.Rotation[ 2 ]    , ") " \
-															, AdaptBool[_Output_GetSegmentGlobalRotationHelical.Occluded ]
+			print "        Global Rotation Helical: (", _Output_GetSegmentGlobalRotationHelical.Rotation[ 0 ], ", " \
+													, _Output_GetSegmentGlobalRotationHelical.Rotation[ 1 ], ", " \
+													, _Output_GetSegmentGlobalRotationHelical.Rotation[ 2 ], ") " \
+													, AdaptBool[_Output_GetSegmentGlobalRotationHelical.Occluded ]
 
 			# Get the global segment rotation as a matrix
 			_Output_GetSegmentGlobalRotationMatrix = MyClient.GetSegmentGlobalRotationMatrix( SubjectName, SegmentName )
-			print "        Global Rotation Matrix: (", _Output_GetSegmentGlobalRotationMatrix.Rotation[ 0 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 1 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 2 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 3 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 4 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 5 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 6 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 7 ]    , ", " \
-															, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 8 ]    , ") " \
-															, AdaptBool[_Output_GetSegmentGlobalRotationMatrix.Occluded ]
+			print "        Global Rotation Matrix: (", _Output_GetSegmentGlobalRotationMatrix.Rotation[ 0 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 1 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 2 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 3 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 4 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 5 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 6 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 7 ], ", " \
+													, _Output_GetSegmentGlobalRotationMatrix.Rotation[ 8 ], ") " \
+													, AdaptBool[_Output_GetSegmentGlobalRotationMatrix.Occluded ]
 
 
 			# Get the global segment rotation in quaternion co-ordinates
 			_Output_GetSegmentGlobalRotationQuaternion = MyClient.GetSegmentGlobalRotationQuaternion( SubjectName, SegmentName )
-			print "        Global Rotation Quaternion: (", _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 0 ]    , ", " \
-														 , _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 1 ]    , ", " \
-														 , _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 2 ]    , ", " \
-														 , _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 3 ]    , ") " \
+			print "        Global Rotation Quaternion: (", _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 0 ], ", " \
+														 , _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 1 ], ", " \
+														 , _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 2 ], ", " \
+														 , _Output_GetSegmentGlobalRotationQuaternion.Rotation[ 3 ], ") " \
 														 , AdaptBool[_Output_GetSegmentGlobalRotationQuaternion.Occluded ]
 
 
 			# Get the global segment rotation in EulerXYZ co-ordinates
 			_Output_GetSegmentGlobalRotationEulerXYZ = MyClient.GetSegmentGlobalRotationEulerXYZ( SubjectName, SegmentName )
-			print "        Global Rotation EulerXYZ: (" , _Output_GetSegmentGlobalRotationEulerXYZ.Rotation[ 0 ]    , ", " \
-														, _Output_GetSegmentGlobalRotationEulerXYZ.Rotation[ 1 ]    , ", " \
-														, _Output_GetSegmentGlobalRotationEulerXYZ.Rotation[ 2 ]    , ")" \
+			print "        Global Rotation EulerXYZ: (" , _Output_GetSegmentGlobalRotationEulerXYZ.Rotation[ 0 ], ", " \
+														, _Output_GetSegmentGlobalRotationEulerXYZ.Rotation[ 1 ], ", " \
+														, _Output_GetSegmentGlobalRotationEulerXYZ.Rotation[ 2 ], ")" \
 														, AdaptBool[_Output_GetSegmentGlobalRotationEulerXYZ.Occluded ]
 
 			# Get the local segment translation
 			_Output_GetSegmentLocalTranslation = MyClient.GetSegmentLocalTranslation( SubjectName, SegmentName )
-			print "        Local Translation: (", _Output_GetSegmentLocalTranslation.Translation[ 0 ] , ", " \
-												, _Output_GetSegmentLocalTranslation.Translation[ 1 ] , ", " \
-												, _Output_GetSegmentLocalTranslation.Translation[ 2 ] , ")" \
+			print "        Local Translation: (", _Output_GetSegmentLocalTranslation.Translation[ 0 ], ", " \
+												, _Output_GetSegmentLocalTranslation.Translation[ 1 ], ", " \
+												, _Output_GetSegmentLocalTranslation.Translation[ 2 ], ")" \
 												, AdaptBool[_Output_GetSegmentLocalTranslation.Occluded]
 
 			# Get the local segment rotation in helical co-ordinates
 			_Output_GetSegmentLocalRotationHelical = MyClient.GetSegmentLocalRotationHelical( SubjectName, SegmentName )
-			print "        Local Rotation Helical: (", _Output_GetSegmentLocalRotationHelical.Rotation[ 0 ]    , ", " \
-													 , _Output_GetSegmentLocalRotationHelical.Rotation[ 1 ]    , ", " \
-													 , _Output_GetSegmentLocalRotationHelical.Rotation[ 2 ]    , ")" \
+			print "        Local Rotation Helical: (", _Output_GetSegmentLocalRotationHelical.Rotation[ 0 ], ", " \
+													 , _Output_GetSegmentLocalRotationHelical.Rotation[ 1 ], ", " \
+													 , _Output_GetSegmentLocalRotationHelical.Rotation[ 2 ], ")" \
 													 , AdaptBool[_Output_GetSegmentLocalRotationHelical.Occluded]
 
 			# Get the local segment rotation as a matrix
 			_Output_GetSegmentLocalRotationMatrix = MyClient.GetSegmentLocalRotationMatrix( SubjectName, SegmentName )
-			print "        Local Rotation Matrix: (", _Output_GetSegmentLocalRotationMatrix.Rotation[ 0 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 1 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 2 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 3 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 4 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 5 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 6 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 7 ]    , ", " \
-													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 8 ]    , ")" \
+			print "        Local Rotation Matrix: (", _Output_GetSegmentLocalRotationMatrix.Rotation[ 0 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 1 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 2 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 3 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 4 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 5 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 6 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 7 ], ", " \
+													, _Output_GetSegmentLocalRotationMatrix.Rotation[ 8 ], ")" \
 													, AdaptBool[_Output_GetSegmentLocalRotationMatrix.Occluded ]
 
 			# Get the local segment rotation in quaternion co-ordinates
 			_Output_GetSegmentLocalRotationQuaternion = MyClient.GetSegmentLocalRotationQuaternion( SubjectName, SegmentName )
-			print "        Local Rotation Quaternion: (", _Output_GetSegmentLocalRotationQuaternion.Rotation[ 0 ]    , ", " \
-																, _Output_GetSegmentLocalRotationQuaternion.Rotation[ 1 ]    , ", " \
-																, _Output_GetSegmentLocalRotationQuaternion.Rotation[ 2 ]    , ", " \
-																, _Output_GetSegmentLocalRotationQuaternion.Rotation[ 3 ]    , ") " \
-																, AdaptBool[_Output_GetSegmentLocalRotationQuaternion.Occluded ]
+			print "        Local Rotation Quaternion: (", _Output_GetSegmentLocalRotationQuaternion.Rotation[ 0 ], ", " \
+														, _Output_GetSegmentLocalRotationQuaternion.Rotation[ 1 ], ", " \
+														, _Output_GetSegmentLocalRotationQuaternion.Rotation[ 2 ], ", " \
+														, _Output_GetSegmentLocalRotationQuaternion.Rotation[ 3 ], ") " \
+														, AdaptBool[_Output_GetSegmentLocalRotationQuaternion.Occluded ]
 
 			# Get the local segment rotation in EulerXYZ co-ordinates
 			_Output_GetSegmentLocalRotationEulerXYZ = MyClient.GetSegmentLocalRotationEulerXYZ( SubjectName, SegmentName )
-			print "        Local Rotation EulerXYZ: (", _Output_GetSegmentLocalRotationEulerXYZ.Rotation[ 0 ]    , ", " \
-															, _Output_GetSegmentLocalRotationEulerXYZ.Rotation[ 1 ]    , ", " \
-															, _Output_GetSegmentLocalRotationEulerXYZ.Rotation[ 2 ]    , ") " \
-															, AdaptBool[_Output_GetSegmentLocalRotationEulerXYZ.Occluded ]
+			print "        Local Rotation EulerXYZ: (", _Output_GetSegmentLocalRotationEulerXYZ.Rotation[ 0 ], ", " \
+													, _Output_GetSegmentLocalRotationEulerXYZ.Rotation[ 1 ], ", " \
+													, _Output_GetSegmentLocalRotationEulerXYZ.Rotation[ 2 ], ") " \
+													, AdaptBool[_Output_GetSegmentLocalRotationEulerXYZ.Occluded ]
 
 		# Count the number of markers
 		MarkerCount = MyClient.GetMarkerCount( SubjectName ).MarkerCount
@@ -270,11 +270,11 @@ def viconReadFrame(MyClient):
 			# Get the global marker translation
 			_Output_GetMarkerGlobalTranslation = MyClient.GetMarkerGlobalTranslation( SubjectName, MarkerName )
 
-			print "      Marker #", MarkerIndex                           , ": "\
-					, MarkerName                                          , " ("\
-					, _Output_GetMarkerGlobalTranslation.Translation[ 0 ] , ", "\
-					, _Output_GetMarkerGlobalTranslation.Translation[ 1 ] , ", "\
-					, _Output_GetMarkerGlobalTranslation.Translation[ 2 ] , ") "\
+			print "      Marker #", MarkerIndex, ": "\
+					, MarkerName, " ("\
+					, _Output_GetMarkerGlobalTranslation.Translation[ 0 ], ", "\
+					, _Output_GetMarkerGlobalTranslation.Translation[ 1 ], ", "\
+					, _Output_GetMarkerGlobalTranslation.Translation[ 2 ], ") "\
 					, AdaptBool[_Output_GetMarkerGlobalTranslation.Occluded ]
 	# Get the unlabeled markers
 	UnlabeledMarkerCount = MyClient.GetUnlabeledMarkerCount().MarkerCount
@@ -283,7 +283,7 @@ def viconReadFrame(MyClient):
 		# Get the global marker translation
 		_Output_GetUnlabeledMarkerGlobalTranslation = MyClient.GetUnlabeledMarkerGlobalTranslation( UnlabeledMarkerIndex )
 
-		print "      Marker #", UnlabeledMarkerIndex                          , ": ("\
+		print "      Marker #", UnlabeledMarkerIndex, ": ("\
 				, _Output_GetUnlabeledMarkerGlobalTranslation.Translation[ 0 ], ", " \
 				, _Output_GetUnlabeledMarkerGlobalTranslation.Translation[ 1 ], ", " \
 				, _Output_GetUnlabeledMarkerGlobalTranslation.Translation[ 2 ], ") "
@@ -299,7 +299,7 @@ def viconParseFrame(MyClient):
 
 	ret['frame_number'] = MyClient.GetFrameNumber().FrameNumber
 	# Get the timecode
-	tc  = MyClient.GetTimecode()
+	tc = MyClient.GetTimecode()
 	ret['tc'] = '%02d:%02d:%02d:%02d:%02d %s %s %s %s' % \
 				(tc.Hours,tc.Minutes,tc.Seconds,tc.Frames,tc.SubFrame,AdaptBool[tc.FieldFlag ],tc.Standard,tc.SubFramesPerFrame,tc.UserBits)
 

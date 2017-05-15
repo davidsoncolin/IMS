@@ -162,19 +162,8 @@ def convertBVH_to_SKEL(bvh, skelFilename):
 if __name__ == '__main__':
 
 	import IO
-	import os; atHome=os.path.isdir('/dev')
-	homeDir = '../../data/'
-	#first = 'c3po'
-	#second = 'c3po2'
-	#skelDict = IO.load(homeDir+'%s.skel' % first)[1]
-	#animDict = IO.load(homeDir+'%s.anim' % first)[1]
-	#animDict2 = IO.load(homeDir+'%s.anim' % second)[1]
-
-	scene = 'trot'
-	scene = 'gallop'
-	dr = 'C:/Users/ColinD/Desktop/'
-	if atHome: dr = '../../../../Captury/'
-	filename = '%s%s.bvh' % (dr,scene)
+	import os, sys
+	filename = sys.argv[1]
 	skelDict = read_BVH(filename)
 	animDict = {'dofData':skelDict.pop('dofData'),'frameNumbers':skelDict.pop('frameNumbers')}
 

@@ -11,8 +11,8 @@ def hashState(frame): # TODO this is somewhat inefficient, but more advanced met
 
 	The hash is used to determine if any actor has exited/entered the scene i.e. the hash will have changed
 
-	:param frame:      data frame
-	:return:           Python hash value
+	:param frame: data frame
+	:return: Python hash value
 	"""
 	s = str(frame['num_subjects'])
 	for subject in frame['subjects']:
@@ -30,12 +30,12 @@ def main():
 	"""
 	global frame_number
 
-	def getRecordedFrame():                       # get frame from a numbered sequence of stored files
+	def getRecordedFrame(): # get frame from a numbered sequence of stored files
 		global frame_number
-		frame_number =  frame_number + 1
-		prefix       =  "C:\\temp\\saved_frames\\saved_frame_"
+		frame_number = frame_number + 1
+		prefix = os.path.join(os.environ['GRIP_TEMP'],'saved_frame_')
 		file_name = prefix + str(frame_number) + ".data"
-		if ( not os.path.isfile(file_name) ):    # cycle back to beginning again when go over the number of stored file
+		if ( not os.path.isfile(file_name) ): # cycle back to beginning again when go over the number of stored file
 			frame_number = 1
 		file_name = prefix + str(frame_number) + ".data"
 		print("file name = " + file_name)

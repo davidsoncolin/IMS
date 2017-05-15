@@ -6,8 +6,8 @@ from GCore import Recon
 
 class PointsFromDetections(Op.Op):
 	def __init__(self, name='/Reconstruct 3D from Dets', locations='', calibration='', tiltThreshold=0.0002, x2dThreshold=0.01,
-	             x3dThreshold=30.0, minRays=3, seedX3ds='', showContributions=True, pointSize=8.0, colour=(1.0, 0.5, 0.0, 0.7),
-	             setLabels=False, mesh='', visibilityLod='', intersection_threshold=100., generateNormals=False, frameRange=''):
+				x3dThreshold=30.0, minRays=3, seedX3ds='', showContributions=True, pointSize=8.0, colour=(1.0, 0.5, 0.0, 0.7),
+				setLabels=False, mesh='', visibilityLod='', intersection_threshold=100., generateNormals=False, frameRange=''):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Detection locations', 'Detection locations', 'string', locations, {}),
@@ -94,24 +94,13 @@ class PointsFromDetections(Op.Op):
 				tris = lodVerts[lodTris]
 				cameraPositions = np.array([m[4] for m in mats], dtype=np.float32)
 				self.visibility.setLods(tris, cameraPositions, np.concatenate((lodNormals)),
-				                        attrs['intersection_threshold'], attrs['generateNormals'])
+										attrs['intersection_threshold'], attrs['generateNormals'])
 
 		# Calculate the 3D reconstructions from the detections
-		# for n in range(min_rays, min_rays - 1, -1):
-		# 	x3ds, labels = Recon.intersect_rays(x2ds, x2ds_splits, Ps, mats, seed_x3ds=seed_x3ds, tilt_threshold=tilt_threshold,
-		#                                         x2d_threshold=x2d_threshold, x3d_threshold=x3d_threshold, min_rays=n)
-		# 	seed_x3ds = x3ds
 		x3ds, labels, _, _ = Recon.intersect_rays(x2ds, x2ds_splits, Ps, mats, seed_x3ds=seed_x3ds, tilt_threshold=tilt_threshold,
-	                                        x2d_threshold=x2d_threshold, x3d_threshold=x3d_threshold, min_rays=min_rays,
-	                                        numPolishIts=3, forceRayAgreement=True,
-		                                    visibility=self.visibility)
-
-		# Recon.intersect_rays(x2ds, splits, self.Ps, self.mats, seed_x3ds=x3ds, tilt_threshold=self.tilt_threshold,
-		# 	                                                     x2d_threshold=self.x2d_threshold, x3d_threshold=self.x3d_threshold, min_rays=self.min_rays,
-		# 	                                                     numPolishIts=settings.numPolishIts, forceRayAgreement=settings.forceRayAgreement,
-		# 	                                                     visibility=settings.visibility)
-		#  x3ds, labels = Recon.intersect_rays(x2ds, x2ds_splits, x2ds_bright, x2ds_bright_splits, Ps, mats, seed_x3ds=seed_x3ds, tilt_threshold=tilt_threshold,
-	    #                                    x2d_threshold=x2d_threshold, x3d_threshold=x3d_threshold, min_rays=min_rays)
+											x2d_threshold=x2d_threshold, x3d_threshold=x3d_threshold, min_rays=min_rays,
+											numPolishIts=3, forceRayAgreement=True,
+											visibility=self.visibility)
 
 		if not x3ds.any() or not labels.any(): return
 		x3ds_labels = np.arange(np.max(labels) + 1)
@@ -143,8 +132,8 @@ class PointsFromDetections(Op.Op):
 
 class PointsFromDetectionsAll(Op.Op):
 	def __init__(self, name='/PointsFromDetectionsAll', locations='', calibration='', tiltThreshold=0.0002,
-	             pointSize=8.0, colour=(1.0, 0.5, 0.0, 0.7),  mesh='', visibilityLod='',
-	             intersection_threshold=100., generateNormals=True, frameRange=''):
+				pointSize=8.0, colour=(1.0, 0.5, 0.0, 0.7), mesh='', visibilityLod='',
+				intersection_threshold=100., generateNormals=True, frameRange=''):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Detection locations', 'Detection locations', 'string', locations, {}),
@@ -206,7 +195,7 @@ class PointsFromDetectionsAll(Op.Op):
 			camPairDist = np.linalg.norm(axis)
 			if camPairDist > 7000.: continue
 			tilt_i = np.dot(map(norm, np.cross(rays[ui], axis)), tilt_axes[ci])
-			tilt_j = np.dot(map(norm, np.cross(rays[uj], axis)), tilt_axes[ci])  # NB tilt_axes[ci] not a bug
+			tilt_j = np.dot(map(norm, np.cross(rays[uj], axis)), tilt_axes[ci]) # NB tilt_axes[ci] not a bug
 			io = np.argsort(tilt_i)
 			jo = np.argsort(tilt_j)
 			for ii, d0 in enumerate(tilt_i[io]):
@@ -263,11 +252,11 @@ class PointsFromDetectionsAll(Op.Op):
 				tris = lodVerts[lodTris]
 				cameraPositions = np.array([m[4] for m in mats], dtype=np.float32)
 				self.visibility.setLods(tris, cameraPositions, np.concatenate((lodNormals)),
-				                        attrs['intersection_threshold'], attrs['generateNormals'])
+										attrs['intersection_threshold'], attrs['generateNormals'])
 
 		# Calculate the 3D reconstructions from the detections
 		x3ds, reconstructionData, rays, cameraPositions = self.calculate3dPointsFromDetections(x2ds, x2ds_splits, mats, Ps,
-		                                                                                       tilt_threshold=attrs['tilt_threshold'])
+																							tilt_threshold=attrs['tilt_threshold'])
 		x3ds = np.array(x3ds, dtype=np.float32)
 
 		labellingData = LabelData((x2ds, x2ds_splits), reconstructionData, rays, cameraPositions, mats)

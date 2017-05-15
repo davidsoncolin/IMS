@@ -32,7 +32,7 @@ class VSS(Op.Op):
 	def setup(self, interface, attrs):
 		if self.skelDict:
 			# Note: Since dirty state is not properly sorted yet we just leave if we have already loaded a skeleton and assume
-			#       we want to keep the one in the interface
+			# we want to keep the one in the interface
 			return
 
 		if 'vss' in attrs:
@@ -73,7 +73,7 @@ class VSS(Op.Op):
 
 class ASF(Op.Op):
 	def __init__(self, name='/Skeleton_ASF', locations='', asfFilename='', amcFilename='', offset=0, step=1,
-	             boneColour=(0.3, 0.42, 0.66, 1.), allFrames=False, useAnimation=True):
+				boneColour=(0.3, 0.42, 0.66, 1.), allFrames=False, useAnimation=True):
 		fields = [
 			('name', 'name', 'Skeleton name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -95,7 +95,7 @@ class ASF(Op.Op):
 		self.skelDict = None
 		self.animDict = None
 		self.initialRootMat = None
-    
+
 	def setup(self, interface, attrs):
 		if self.skelDict: return
 		asfFilename = attrs['asf']
@@ -221,8 +221,8 @@ class FBX(Op.Op):
 
 class Template(Op.Op):
 	def __init__(self, name='/Skeleton', locations='', sklFilename='', boneColour=(0.3, 0.42, 0.66, 1.), retainDownstreamChanges=True,
-	             lockOriginal=True, useCurrentLabel=False, useAnimation=True, offset=0, stepSize=1, blockedChannels='',
-				 reset=False):
+				lockOriginal=True, useCurrentLabel=False, useAnimation=True, offset=0, stepSize=1, blockedChannels='',
+				reset=False):
 		fields = [
 			('name', 'name', 'Skeleton name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -259,7 +259,7 @@ class Template(Op.Op):
 
 	def setup(self, interface, attrs):
 		# Note: This condition needs to go away and instead we only rely on the cache and dirty states (even if frames change)
-		#       as we need to respond to e.g. changing the skeleton source
+		# as we need to respond to e.g. changing the skeleton source
 		retainDownstreamChanges = attrs['retainDownstreamChanges'] if 'retainDownstreamChanges' in attrs else True
 		if self.skelDict is not None:
 			# if retainDownstreamChanges:
@@ -379,7 +379,7 @@ class Transform(Op.Op):
 			self.attrs[aName] = aValue
 
 		# TODO: This should be formalised and moved to runtime behaviour. Ops should just be providing the information
-		#       and flag that changes are needed
+		# and flag that changes are needed
 		for chanName, value in zip(skelDict['chanNames'], skelDict['chanValues']):
 			if ':r' in chanName:# and not 'Free' in chanName:
 				self.fields.append((chanName, chanName, '', 'float', float(value)))
@@ -390,7 +390,7 @@ class Transform(Op.Op):
 		self.skeletonFields = True
 
 	def cook(self, location, interface, attrs):
-		#  Check if we have anything to do
+		# Check if we have anything to do
 		# if not attrs and not interface.isDirty(): return
 
 		# Look for a skeleton dictionary in the interface
@@ -459,8 +459,8 @@ class Configure(Op.Op):
 		self.skeletonFields = False
 
 	def getOpenGlColour(self, colour):
-		colourWithAlpha = np.append(colour, 128)  # add Alpha
-		glColour = colourWithAlpha.astype(np.float32) / 255.0  # Convert to 0.0~1.0
+		colourWithAlpha = np.append(colour, 128) # add Alpha
+		glColour = colourWithAlpha.astype(np.float32) / 255.0 # Convert to 0.0~1.0
 		return glColour.tolist()
 
 	def configureSkeleton(self, skelDict, subjectName='', glMarkerColour=True, createStickPairs=True):
@@ -494,7 +494,7 @@ class Configure(Op.Op):
 		skelDict['labelNames'] = np.arange(len(skelDict['markerNames']))
 
 	def cook(self, location, interface, attrs):
-		#  Check if we have anything to do
+		# Check if we have anything to do
 		if not attrs and not interface.isDirty(): return
 
 		# Look for a skeleton dictionary in the interface
@@ -640,7 +640,7 @@ class GeometryCopy(Op.Op):
 
 class SetMarkerJointMapping(Op.Op):
 	def __init__(self, name='/Set Marker Joint Mapping', locations='', useAllWeights=False, x3d_threshold=140.0,
-	             allowPartialMatching=False, sourceX3ds='', frameRange=''):
+				allowPartialMatching=False, sourceX3ds='', frameRange=''):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'Skeleton locations', 'string', locations, {}),
@@ -792,7 +792,7 @@ class SetMarkerJointMapping(Op.Op):
 				for jointName, jointWeight in joints:
 					if jointWeight[3] > maxWeight:
 						maxWeight = jointWeight[3]
-						maxIndex  = skelDict['jointIndex'][jointName]
+						maxIndex = skelDict['jointIndex'][jointName]
 
 				if maxIndex != -1:
 					# markerNames.append(skelDict['markerNames'][mi])
@@ -1010,11 +1010,6 @@ class Generative(Op.Op):
 		if self.stablePointsGroups is None:
 			self.collect = False
 
-			# c3dFilename = 'D:\\IMS\\ViconDB\\2016_Tests\\R&D\\160621_A1_ChessSuit_Day01\\# ROM #\\Exports\\160621_Toby_Body_Chess_ROM_02.c3d'
-			# c3d_dict = C3D.read(c3dFilename)
-			# self.c3d_frames, c3d_fps, c3d_labels = c3d_dict['frames'], c3d_dict['fps'], c3d_dict['labels']
-			# self.frameMissingData = self.c3d_frames[:, :, 3]
-
 			self.c3d_frames = np.array(self.frameX3ds, dtype=np.float32)
 			self.frameMissingData = np.array(self.frameMissingData, dtype=np.float32)
 			c3d_labels = np.array(self.frameLabels, dtype=np.int32)
@@ -1025,7 +1020,7 @@ class Generative(Op.Op):
 			goodPoints = np.where(numFramesVisiblePerPoint > 0.80 * len(self.c3d_frames))[0]
 			self.goodFrames = np.where(np.sum(self.frameMissingData[:, goodPoints] == 0, axis=1) == len(goodPoints))[0]
 			print '# Good points:', len(goodPoints)
-			print '# Good frames:', len(self.goodFrames)  # 290 x 6162 (80%), 283 x 8729 (90%), 275x10054 (96%)
+			print '# Good frames:', len(self.goodFrames) # 290 x 6162 (80%), 283 x 8729 (90%), 275x10054 (96%)
 			self.frames = self.c3d_frames[self.goodFrames, :, :][:, goodPoints, :][:, :, :3]
 			# pointLabels = [c3d_labels[g] for g in goodPoints]
 
@@ -1034,11 +1029,10 @@ class Generative(Op.Op):
 			# data = data[::20, :, :]
 			# self.data = self.frames[::20, :, :]
 			self.data = self.frames
-			# M = ASFReader.greedyTriangles(self.data, 30, triangleThreshold=1000., thresholdDistance=10. * 10.)  # only every Nth frame
-			M = ASFReader.greedyTriangles(self.data, None, triangleThreshold=100., thresholdDistance=10. * 10.)  # only every Nth frame
-			stabilizedPointToGroup, stabilizedPointResiduals, stabilizedFrames = ASFReader.assignAndStabilize(self.data,
-			                                                                                                  M['RTs'][M['triIndices'][:28]],
-			                                                                                                  thresholdDistance=10. * 10.)
+			# M = ASFReader.greedyTriangles(self.data, 30, triangleThreshold=1000., thresholdDistance=10. * 10.) # only every Nth frame
+			M = ASFReader.greedyTriangles(self.data, None, triangleThreshold=100., thresholdDistance=10. * 10.) # only every Nth frame
+			stabilizedPointToGroup, stabilizedPointResiduals, stabilizedFrames = \
+				ASFReader.assignAndStabilize(self.data,M['RTs'][M['triIndices'][:28]],thresholdDistance=10. * 10.)
 
 			print '# Frames = %d' % len(stabilizedFrames)
 			print '# Labelled points %d' % np.sum(stabilizedPointToGroup != -1)
@@ -1048,8 +1042,8 @@ class Generative(Op.Op):
 			thresh = [10, 10, 9, 9]
 			for t in thresh:
 				RTs = ASFReader.stabilizeAssignment(self.data, stabilizedPointToGroup)
-				stabilizedPointToGroup, stabilizedPointResiduals, stabilizedFrames = ASFReader.assignAndStabilize(self.data, RTs,
-				                                                                                                  thresholdDistance=float(t) ** 2)
+				stabilizedPointToGroup, stabilizedPointResiduals, stabilizedFrames = \
+					ASFReader.assignAndStabilize(self.data, RTs, thresholdDistance=float(t) ** 2)
 				print 'number of labelled points %d' % np.sum(stabilizedPointToGroup != -1)
 				print 'RMS of labelled points %fmm' % np.sqrt(np.mean(stabilizedPointResiduals[np.where(stabilizedPointToGroup != -1)]))
 
@@ -1173,12 +1167,12 @@ class ExportMarkerMapping(Op.Op):
 		effectorData = SolveIK.make_effectorData(skelDict)
 		effectorLabels = range(len(skelDict['markerNames']))
 		x3ds_ted, labels_ted = SolveIK.skeleton_marker_positions(skelDict, skelDict['rootMat'], skelDict['chanValues'],
-		                                                         effectorLabels, effectorData)
+																 effectorLabels, effectorData)
 
 		effectorData_src = SolveIK.make_effectorData(skelDict_src)
 		effectorLabels_src = np.array([int(mn) for mn in skelDict_src['markerNames']], dtype=np.int32)
 		x3ds_src, labels_src = SolveIK.skeleton_marker_positions(skelDict_src, skelDict_src['rootMat'], skelDict_src['chanValues'],
-		                                                         effectorLabels_src, effectorData_src)
+																 effectorLabels_src, effectorData_src)
 
 		labels = -np.ones(len(x3ds_ted), dtype=np.int32)
 		score = Label.match(x3ds_src, x3ds_ted, attrs['x3d_threshold'], None, labels)
@@ -1235,17 +1229,17 @@ class ApplyMarkerMapping(Op.Op):
 			self.effectorData_source = SolveIK.make_effectorData(skelDict_src)
 			self.effectorLabels_source = np.array([int(mn) for mn in skelDict_src['markerNames']], dtype=np.int32)
 
-		x3ds_target, labels_target = SolveIK.skeleton_marker_positions(skelDict, skelDict['rootMat'], skelDict['chanValues'],
-		                                                               self.effectorLabels_target, self.effectorData_target)
-		x3ds_source, labels_source = SolveIK.skeleton_marker_positions(skelDict_src, skelDict_src['rootMat'], skelDict_src['chanValues'],
-		                                                               self.effectorLabels_source, self.effectorData_source)
+		x3ds_target, labels_target = SolveIK.skeleton_marker_positions (skelDict, skelDict['rootMat'], skelDict['chanValues'],
+																		self.effectorLabels_target, self.effectorData_target)
+		x3ds_source, labels_source = SolveIK.skeleton_marker_positions (skelDict_src, skelDict_src['rootMat'], skelDict_src['chanValues'],
+																		self.effectorLabels_source, self.effectorData_source)
 
 		if self.targetInds is None:
 			self.targetInds, self.sourceInds = mappingDict['target'].astype(np.int32), mappingDict['source'].astype(np.int32)
 
 		x3ds_target[self.targetInds] = x3ds_source[self.sourceInds]
-		SolveIK.solve_skeleton_from_3d(x3ds_target, labels_target, self.effectorLabels_target, skelDict, self.effectorData_target,
-		                               skelDict['rootMat'])
+		SolveIK.solve_skeleton_from_3d (x3ds_target, labels_target, self.effectorLabels_target, skelDict, self.effectorData_target,
+										skelDict['rootMat'])
 
 		interface.setAttr('skelDict', skelDict)
 

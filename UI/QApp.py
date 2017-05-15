@@ -6,10 +6,8 @@
  - add a Qview, a layer manager for the layers, a field editor for the selected layer
  - create a camera from an image sequence (drag-drop also possible); update list of cameras in Qview
  - render to a file sequence (reinterlace options)
- - when a layer is selected
-   * update the layer field editor
- - when a layer is added/moved/deleted/edited/selected
-   * rerender the layer on this frame and update the Qview
+ - when a layer is selected update the layer field editor
+ - when a layer is added/moved/deleted/edited/selected rerender the layer on this frame and update the Qview
 '''
 from PySide.QtOpenGL import QGLFormat
 
@@ -214,7 +212,7 @@ class QGLPanel(GPanel):
 		'''toggle the provided draw option
 		
 		:param int opt: one or a combination of :`data:UI.DRAWOPTS` values'''
-		self.view.drawOpts ^=  opt
+		self.view.drawOpts ^= opt
 		self.view.updateGL()
 
 	def setCamera(self, camera):
@@ -258,7 +256,7 @@ class QApp(QtGui.QMainWindow):
 		self.move(0,0)
 		self.resize(640, 480)
 		self.setWindowTitle(State.appName())
-		self.setFocusPolicy(QtCore.Qt.StrongFocus)  # get keyboard events
+		self.setFocusPolicy(QtCore.Qt.StrongFocus) # get keyboard events
 		self.blockUpdate = False
 		self.set_widget = {}
 		self.trigger_calls = {}
@@ -277,9 +275,9 @@ class QApp(QtGui.QMainWindow):
 		self.getOrCreateMenu('&View')
 		#self.addMenuItem({'menu':'&Create','item':'&Image','tip':'Create image','cmd':self.loadImage})
 		self.qglview = QGLViewer.QGLView()
-		self.qview      = QGLPanel(self.qglview, parent=self)
-		self.qfields    = QFields.QFieldsEditor(self)
-		self.qoutliner  = QStateTreeView.QStateTreeView()
+		self.qview = QGLPanel(self.qglview, parent=self)
+		self.qfields = QFields.QFieldsEditor(self)
+		self.qoutliner = QStateTreeView.QStateTreeView()
 		self.qoutliner.selectionModel().currentChanged.connect(functools.partial(self.selectCB2, caller=self.qoutliner))
 
 		# Add Ops list
@@ -290,26 +288,26 @@ class QApp(QtGui.QMainWindow):
 		self.cameraPanels = None
 
 		# Add Python Console
-		self.qpython    = UI.QCore.PythonConsole()
+		self.qpython = UI.QCore.PythonConsole()
 		
-		#self.qlayers   = Qlayers.Qlayers(self)
+		#self.qlayers = Qlayers.Qlayers(self)
 		self.qtimeline = UI.QTimeline(self)
 		self.setCentralWidget(self.qview)
 		ar = (QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea | QtCore.Qt.BottomDockWidgetArea | QtCore.Qt.TopDockWidgetArea)
-		self.attributeEditor = self.addDock('Attribute Editor', self.qfields,   ar, QtCore.Qt.RightDockWidgetArea)
+		self.attributeEditor = self.addDock('Attribute Editor', self.qfields, ar, QtCore.Qt.RightDockWidgetArea)
 
 		# Add docks and tab the Ops, outliner, and script together
-		self.opNodes = self.addDock('Ops', self.qnodes,   ar, QtCore.Qt.RightDockWidgetArea)
+		self.opNodes = self.addDock('Ops', self.qnodes, ar, QtCore.Qt.RightDockWidgetArea)
 		self.outliner = self.addDock('Outliner', self.qoutliner, ar, QtCore.Qt.RightDockWidgetArea)
-		self.pythonDock = self.addDock('Console',  self.qpython, ar, QtCore.Qt.BottomDockWidgetArea)
+		self.pythonDock = self.addDock('Console', self.qpython, ar, QtCore.Qt.BottomDockWidgetArea)
 		self.tabifyDockWidget(self.opNodes, self.outliner)
 		self.tabifyDockWidget(self.outliner, self.pythonDock)
 
-		self.timelineDock = self.addDock('Timeline',        self.qtimeline, ar, QtCore.Qt.BottomDockWidgetArea)
+		self.timelineDock = self.addDock('Timeline', self.qtimeline, ar, QtCore.Qt.BottomDockWidgetArea)
 
-		self.setTabPosition(QtCore.Qt.TopDockWidgetArea,    QtGui.QTabWidget.North)
-		self.setTabPosition(QtCore.Qt.RightDockWidgetArea,  QtGui.QTabWidget.East )
-		self.setTabPosition(QtCore.Qt.LeftDockWidgetArea,   QtGui.QTabWidget.West )
+		self.setTabPosition(QtCore.Qt.TopDockWidgetArea, QtGui.QTabWidget.North)
+		self.setTabPosition(QtCore.Qt.RightDockWidgetArea,QtGui.QTabWidget.East )
+		self.setTabPosition(QtCore.Qt.LeftDockWidgetArea, QtGui.QTabWidget.West )
 		self.setTabPosition(QtCore.Qt.BottomDockWidgetArea, QtGui.QTabWidget.North)
 		self.updateMenus()
 
@@ -455,7 +453,7 @@ class QApp(QtGui.QMainWindow):
 
 	def closeEvent(self, event):
 		if not self.sure(): event.ignore()
-		else:               event.accept()
+		else: event.accept()
 
 	def quit(self):
 		if not self.sure(): return
@@ -478,11 +476,9 @@ class QApp(QtGui.QMainWindow):
 	def updateMenus(self):
 		'''Keeps the GUI menus and the attribute editor in sync with the actual state.'''
 		undoCmd = State.getUndoCmd()
-		if undoCmd is None: self.undoItem.setText('&Undo')
-		else:               self.undoItem.setText('&Undo [%s]' % undoCmd)
+		self.undoItem.setText('&Undo' if undoCmd is None else '&Undo [%s]' % undoCmd)
 		redoCmd = State.getRedoCmd()
-		if redoCmd is None: self.redoItem.setText('Re&do')
-		else:               self.redoItem.setText('Re&do [%s]' % redoCmd)
+		self.redoItem.setText('Re&do' if redoCmd is None else 'Re&do [%s]' % redoCmd)
 		#print undoCmd, redoCmd
 		if self.attributeEditor is not None:
 			sel = State.getSel()
@@ -505,11 +501,9 @@ class QApp(QtGui.QMainWindow):
 		self.clean_state() # if changing the field has side effects, these should happen before the push (I think)
 		State.push('Set %s' % str(field))
 		undoCmd = State.getUndoCmd()
-		if undoCmd is None: self.undoItem.setText('&Undo')
-		else:               self.undoItem.setText('&Undo [%s]' % undoCmd)
+		self.undoItem.setText('&Undo' if undoCmd is None else '&Undo [%s]' % undoCmd)
 		redoCmd = State.getRedoCmd()
-		if redoCmd is None: self.redoItem.setText('Re&do')
-		else:               self.redoItem.setText('Re&do [%s]' % redoCmd)
+		self.redoItem.setText('Re&do' if redoCmd is None else 'Re&do [%s]' % redoCmd)
 
 	@staticmethod
 	def createKeyCommand(key, value):
@@ -660,10 +654,10 @@ if __name__ == '__main__':
 	a.setStyle('plastique')
 	fields = {'image filter':[
 		('filename', 'File name', 'Full-path to the file on disk. For sequences, choose any file from the sequence.', 'filename', None),
-		('issequence',  'Is sequence', 'Is this an image sequence (checked), or a static image.', 'bool', False),
+		('issequence', 'Is sequence', 'Is this an image sequence (checked), or a static image.', 'bool', False),
 		(None, None, None, 'if', 'issequence'),
-		('numdigits',  'Number of digits', 'The number of digits in the number sequence (pad with leading zeros). Choose 0 for no padding.', 'int', 0, {"min":0,"max":None}),
-		('inframe',  'Start frame', 'If this is an image sequence, the first frame of the sequence.', 'int', 0, {"min":0,"max":None}),
+		('numdigits', 'Number of digits', 'The number of digits in the number sequence (pad with leading zeros). Choose 0 for no padding.', 'int', 0, {"min":0,"max":None}),
+		('inframe', 'Start frame', 'If this is an image sequence, the first frame of the sequence.', 'int', 0, {"min":0,"max":None}),
 		('outframe', 'End frame', 'If this is an image sequence, the last frame of the sequence.', 'int', 0, {"min":0,"max":None}),
 		(None, None, None, 'endif', 'issequence'),
 		('deinterlace', 'Deinterlace mode', 'If the video is interlaced, choose the deinterlace mode that gives continuous motion.', 'select', 'None', {'enum':['None','Odd only','Even only','Odd-Even','Even-Odd']}),

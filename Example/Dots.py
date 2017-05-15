@@ -35,111 +35,6 @@ def find_labels(x2ds, model, x2ds_indices, model_indices, threshold, labels_out)
 	ms = np.sum(labels_out != -1)
 	return ((sc-(len(x2ds)-len(model))*(threshold**2))/len(model))**0.5,ms
 
-def detect_VICON_tiara(x2ds, hint = None):
-	'''The VICON tiara is defined by a list of points in a svg file.
-	These points were extracted and converted to mm (assuming 90dpi ie A4 paper). The points should have 3.8mm radius.
-	The points were centred so that their mean is zero. They are on the z=0 plane.'''
-	tiara = VICON_tiara_x3ds[:,:2]
-	x2ds_indices = [116,111,99,92,84,75,68,58,50,45]
-	tiara_indices = [0,1,6,7,8,9,10,12,20,21]
-	print 'hint',hint
-	if hint == '0':
-		x2ds_indices,tiara_indices = \
-			[116,111,109,104,101,97,99,92,84,75,68,63,58,95,88,78,69,61,57,49,50,45],\
-			[  0,  1,  2,  3,  4, 5, 6, 7, 8, 9,10,11,12, 13,14,15,16,17,18,19,20,21]
-			# fov,ptr,txyz,dist = 65.02, (-25.51,22.15,102.12), (92.1,-46.6,223.9), (0.13603,0.36855)
-	elif hint == '1':
-		x2ds_indices,tiara_indices = \
-			[170,164,165,158,155,145,151,134,119,111,100,93,86,140,127,112,101,91,77,67,68,58],[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
-			# fov,ptr,txyz,dist = 65.73, (-26.99,35.20,106.71), (91.8,5.9,194.8), (0.12689,0.25306)
-	elif hint == '2':
-		x2ds_indices,tiara_indices = \
-			[43, 48, 51, 58, 61, 63, 59, 68, 77, 86, 97, 104, 105, 71, 81, 91, 101, 107, 119, 125, 118],\
-			[ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,  11,  12, 13, 14, 15,  16,  17,  18,  19,  20] # fov 70.3
-			## TODO 21=129 completely throws it off! why?
-			# fov,ptr,txyz,dist = 70.30, (34.16,35.69,-108.34), (-96.4,3.3,170.0), (0.12300,0.36833)
-	elif hint == '3':
-		x2ds_indices,tiara_indices = \
-			[55, 61, 66, 71, 76, 77, 72, 82, 96, 105, 118, 125, 127, 86, 101, 112, 124, 130, 140, 144, 141, 149],\
-			[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
-			# fov,ptr,txyz,dist = 59.64, (25.63,20.36,-106.02), (-116.3,-30.2,239.1), (0.18708,0.19526)
-
-	labels_out = -np.ones(x2ds.shape[0],dtype=np.int32)
-	#labels_out[x2ds_indices] = tiara_indices
-	print find_labels(x2ds, tiara, x2ds_indices, tiara_indices, 4.0, labels_out) #
-
-	#good_labels = np.where(labels_out != -1)[0]
-	#tmp = np.argsort(labels_out[good_labels])
-	#x2ds_indices, tiara_indices = good_labels[tmp],labels_out[good_labels][tmp]
-	#print find_labels(x2ds, tiara, x2ds_indices, tiara_indices, 4.0, labels_out) #
-
-	good_labels = np.where(labels_out != -1)[0]
-	tmp = np.argsort(labels_out[good_labels])
-	print list(good_labels[tmp]), list(labels_out[good_labels][tmp])
-	#11 61 130 1185.80091288 19
-	#116 95 45 1191.22292542 16 [ true ]
-	#141 101 16 1173.66877767 20 [ false !]
-	
-	P,ks,rms = Calibrate.cv2_solve_camera_from_3d(VICON_tiara_x3ds[tiara_indices], x2ds[x2ds_indices], Kin=Calibrate.composeK(76.5), solve_distortion = True, solve_principal_point = False, solve_focal_length = False)
-	print P,ks,rms
-	return labels_out, P,ks
-
-	# now, it is assumed that a subset of the x2ds match the tiara.
-	# stupid N^3 algorithm:
-	#   for each triple of x2ds
-	#   - find the affinity assuming they match three particular points
-	#   - count the number of inliers / residual
-	#   yield the best assignment
-	#   solve for a P matrix
-	#
-	# *BUT* this doesn't actually work!
-	# the problem is that, if I pick widely separated points then the transform induced by those points
-	# can bring many many detections to the area of the tiara. that means it will achieve more assignments
-	# and a lower residual.
-	#
-	# how can this be improved?
-	# - for example, we could choose the points to be equilateral
-	# - for example, we could make a constraint on the points that they should be in a straight line (with a particular ratio)
-	# - for example, we could choose a point and its two closest neighbours
-	# - for example, we could calculate invariants for each point and its neighbours and look for collisions
-	# - for example, we could calculate a similarity matrix for each point and each tiara point (Nx22) and solve an assignment problem
-	# - for example, ...
-	tiara_indices = [0,len(tiara)/2+2,-1]
-	C = tiara[tiara_indices][:,:2] # 3x2 matrix
-	print 'true',np.array(x2ds_indices,dtype=np.int32)[tiara_indices]
-	#print C
-	#exit()
-	threshold = 3.0 # mm
-	cloud = ISCV.HashCloud2D(tiara, threshold)
-	numPoints = x2ds.shape[0]
-	labels_out = -np.ones(numPoints,dtype=np.int32)
-	best_sc = threshold**2 * numPoints
-	best_labels = -np.ones(numPoints,dtype=np.int32)
-	max_sc = 0
-	max_labels = -np.ones(numPoints,dtype=np.int32)
-	import itertools
-	for xi,xj,xk in itertools.permutations(range(numPoints), 3):
-		if xj == 0 and xk == 1: print xi
-		if xi < 116: continue
-		X = x2ds[[xi,xj,xk]] # 3x2 matrix
-		# X_3x2 A_2x2 + B_2 = C_3x2
-		A = np.linalg.lstsq(X[1:]-X[0],C[1:]-C[0])[0]
-		B = np.mean(C - np.dot(X,A),axis=0)
-		L = np.dot(x2ds,A)+B
-		scores,matches,matches_splits = cloud.score(L)
-		sc = ISCV.min_assignment_sparse(scores, matches, matches_splits, threshold**2, labels_out)
-		ms = np.sum(labels_out != -1)
-		if sc < best_sc:
-			print xi,xj,xk,sc,ms
-			best_sc = sc
-			best_labels[:] = labels_out
-		if ms > max_sc:
-			print xi,xj,xk,sc,ms
-			max_sc = ms
-			max_labels[:] = labels_out
-	print best_sc, best_labels, max_sc, max_labels
-	return best_sc, best_labels, max_sc, max_labels
-
 def get_movie_frame(md, frame, deinterlacing):
 	'''Read a MovieReader frame and return it together with a filtered version.'''
 	if deinterlacing: field = frame & 1; frame /= 2
@@ -291,42 +186,9 @@ data:        processed image
 """
 #@profile
 def get_dark_and_light_points(colour_image, frame_index, camera_index, opts):
-	use_new_detector = False
-	if ( use_new_detector ):
-		do_plot_histogram      = False
-		do_plot_image          = False  # display
-		do_plot_markers        = False
-		apply_gamma_correction = False
-		n_features = 2 # use (x,y) rather than (x,y,area)
-		do_monochrome_random = False # random colour look-up table
-		f            = run_FEATURE_DETECTOR_tests.run_detector
-		image = run_FEATURE_DETECTOR_tests.rgb2gray(colour_image)
-		result_image, standard = f("davidMSER", colour_image, image, do_plot_histogram, do_plot_image, do_plot_markers, do_monochrome_random, n_features, apply_gamma_correction)
-
-		#file_name       =   "davidMSER_" + str(frame_index) + "_" + str(camera_index) + ".png"
-		#misc.imsave(file_name,result_image)
-		do_sorting = True
-		if ( do_sorting ):
-			black_standard, blue_standard, white_standard = sorting_hat(standard)
-			#print "black_standard =", black_standard
-			#print "blue_standard  =",  blue_standard
-			#print "white_standard =", white_standard
-			pts1         = kpts_to_numpy(white_standard,colour_image)
-			pts0         = kpts_to_numpy(black_standard,colour_image)
-			good_lights  = []
-			good_darks   = []
-		else:
-			pts1         = kpts_to_numpy(standard,colour_image)
-			#print("use new detector gets {} points ", len(standard))
-			good_lights  = []
-			pts0         = np.empty( (0,2), dtype=np.float32)
-			good_darks   = []
-		data = np.dstack( (image,image,image) )
-	else:
-		data = filter_movie_frame(colour_image, opts['small_blur'], opts['large_blur'])
-		good_darks, pts0 = Detect.detect_dots(255-data, opts['threshold_dark_inv'], opts)
-		good_lights,pts1 = Detect.detect_dots(data, opts['threshold_bright'], opts)
-
+	data = filter_movie_frame(colour_image, opts['small_blur'], opts['large_blur'])
+	good_darks, pts0 = Detect.detect_dots(255-data, opts['threshold_dark_inv'], opts)
+	good_lights,pts1 = Detect.detect_dots(data, opts['threshold_bright'], opts)
 	return good_darks, pts0, good_lights, pts1, data
 
 #@profile
@@ -410,23 +272,14 @@ def process_frame(deinterlacing, detectingTiara, detectingWands, frame, opts, pa
 	#data = filter_movie_frame(img, small_blur, large_blur)
 	#img, data = get_processed_movie_frame(md, frame, small_blur, large_blur, deinterlacing)
 	QApp.view().cameras[ci + 1].invalidateImageData()
-	"""
-	if 1:  # show the filtered image
-		img[:] = data
-		pass
-	if 0:  # crush the image to see the blobs
-		lookup = np.zeros(256, dtype=np.uint8)
-		lookup[threshold_bright:] = 255
-		lookup[255 - threshold_dark_inv:threshold_bright] = 128
-		img[:] = lookup[img]
-	"""
+
 	if 1:
 		good_darks, pts0, good_lights, pts1, data = get_dark_and_light_points(img, frame, ci, opts)
-		if 1:  # show the filtered image
+		if 1: # show the filtered image
 			#print "data before insertion", type(data), data.shape
 			#sys.exit(0)
 			img[:] = data
-		if 0:  # crush the image to see the blobs
+		if 0: # crush the image to see the blobs
 			lookup = np.zeros(256, dtype=np.uint8)
 			lookup[threshold_bright:] = 255
 			lookup[255 - threshold_dark_inv:threshold_bright] = 128
@@ -435,11 +288,6 @@ def process_frame(deinterlacing, detectingTiara, detectingWands, frame, opts, pa
 		# good_lights,pts1 = Detect.detect_dots(data, opts['threshold_bright'], opts)
 		print ci, frame, len(pts0), len(pts1), 'good points (darks,lights)'
 
-		if False and frame == 512 and detectingTiara:
-			labels, P, ks = detect_VICON_tiara(pts0, hint=str(ci))
-			QApp.view().cameras[ci + 1].setP(P, distortion=ks)
-			QApp.view().cameras[ci + 1].setResetData()
-
 		if detectingWands:
 			ratio = 2.0;
 			x2d_threshold = 0.5;
@@ -447,12 +295,11 @@ def process_frame(deinterlacing, detectingTiara, detectingWands, frame, opts, pa
 			match_threshold = 0.07 * 2
 			x2ds_labels = -np.ones(pts1.shape[0], dtype=np.int32)
 			x2ds_splits = np.array([0, pts1.shape[0]], dtype=np.int32)
-			ISCV.label_T_wand(pts1, x2ds_splits, x2ds_labels, ratio, x2d_threshold, straightness_threshold,
-							  match_threshold)
+			ISCV.label_T_wand(pts1, x2ds_splits, x2ds_labels, ratio, x2d_threshold, straightness_threshold, match_threshold)
 			print x2ds_labels
 
 			for r, li in zip(good_lights, x2ds_labels):
-				if li != -1:  # make some red boxes
+				if li != -1: # make some red boxes
 					dx, dy = 10, 10
 					img[int(r.sy - dy):int(r.sy + dy), int(r.sx - dx):int(r.sx + dx), 0] = 128
 	else:
@@ -644,7 +491,7 @@ def main():
 	primitives.append(GLPoints3D([]))
 	primitives.append(GLPoints3D([]))
 	primitives.append(GLPoints3D([]))
-	primitives[0].colour = (0,1,1,0.5)   # back-projected "cyan" points
+	primitives[0].colour = (0,1,1,0.5) # back-projected "cyan" points
 	primitives[1].colour = (0,0,1,0.5)
 	primitives[1].pointSize = 5
 	primitives[2].colour = (1,0,0,0.99)
@@ -662,8 +509,8 @@ def main():
 			for fi in dot_detections.keys():
 				frame = c3d_frames[(fi-57) % len(c3d_frames)] # 57 at home, 55 at work... TODO
 				which = np.array(np.where(frame[:,3] == 0)[0],dtype=np.int32)
-				x3ds_seq[fi] = np.concatenate((VICON_tiara_x3ds + np.array([150,-100,0],dtype=np.float32),frame[which,:3])), \
-							   np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
+				x3ds_seq[fi] = 	np.concatenate((VICON_tiara_x3ds + np.array([150,-100,0],dtype=np.float32),frame[which,:3])), \
+								np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
 
 			dot_labels = get_labels(dot_detections.keys(), x3ds_seq, dot_detections, mats, x2d_threshold = 0.05)
 
@@ -679,8 +526,8 @@ def main():
 				for fi in dot_detections.keys():
 					frame = c3d_frames[(fi-57) % len(c3d_frames)] # 57 at home, 55 at work... TODO
 					which = np.array(np.where(frame[:,3] == 0)[0],dtype=np.int32)
-					x3ds_seq[fi] = np.concatenate((VICON_tiara_x3ds + np.array([0,1000,0],dtype=np.float32),frame[which,:3])), \
-								   np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
+					x3ds_seq[fi] =	np.concatenate((VICON_tiara_x3ds + np.array([0,1000,0],dtype=np.float32),frame[which,:3])), \
+									np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
 
 				#dot_labels = get_labels(dot_detections.keys(), x3ds_seq, dot_detections, mats, x2d_threshold = 0.05)
 

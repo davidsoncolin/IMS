@@ -186,7 +186,7 @@ class GLSkel(object):
 			#GL.glUniform4fv(self.colour_shader_colours, 3, self.colours) # NOT WORKING
 			GL.glUniform1iv(self.colour_shader_states,len(self.bone_colour_states), self.bone_colour_states) # set the states so the shader can pick the correct colour per joint
 			GL.glVertexAttrib4f(self.colour_shader_colour, *boneColour)
-			GL.glVertexAttrib4f(self.colour_shader_alt_colour, *COLOURS['Hilighted'])  
+			GL.glVertexAttrib4f(self.colour_shader_alt_colour, *COLOURS['Hilighted'])
 			GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
 			self.bvs.bind()
 			GL.glVertexPointerf(self.bvs)
@@ -199,7 +199,7 @@ class GLSkel(object):
 				for t0 in xrange(b0,b1,128): # draw the bones in batches of 128
 					t1 = min(t0+128,b1)
 					GL.glUniformMatrix4fv(self.colour_shader_myMat, t1-t0, GL.GL_FALSE, self.transforms[t0:t1]) # put the transforms in myMat
-					if DRAWOPT_BONES & drawOpts:  GL.glDrawArrays(GL.GL_LINES,  2*t0, 2*(t1-t0))
+					if DRAWOPT_BONES & drawOpts: GL.glDrawArrays(GL.GL_LINES, 2*t0, 2*(t1-t0))
 					if DRAWOPT_JOINTS & drawOpts: GL.glDrawArrays(GL.GL_POINTS, 2*t0, 2*(t1-t0))
 			self.bvis.unbind()
 			GL.glDisableVertexAttribArray(self.colour_shader_bi)
@@ -217,7 +217,7 @@ class GLSkel(object):
 			self.mvis.bind()
 			GL.glVertexAttribIPointer(self.colour_shader_bi, 1, GL.GL_UNSIGNED_INT, 0, self.mvis) # write the mvis to bi
 			GL.glPointSize(5)
-			GL.glVertexAttrib4f(self.colour_shader_colour, *self.d[K_MARKER_COLOUR])  # write the colour
+			GL.glVertexAttrib4f(self.colour_shader_colour, *self.d[K_MARKER_COLOUR]) # write the colour
 			GL.glDrawArrays(GL.GL_POINTS, m0, m1-m0)
 			self.mvis.unbind()
 			GL.glDisableVertexAttribArray(self.colour_shader_bi)
@@ -235,7 +235,7 @@ class GLSkel(object):
 				GL.glVertexAttribIPointer(self.colour_shader_bi, 1, GL.GL_UNSIGNED_INT, 0, self.avis) # write the avis to bi
 				GL.glLineWidth(2)
 				GL.glVertexAttrib4f(self.colour_shader_colour, 1,0,0,1) # red
-				GL.glVertexAttrib4f(self.colour_shader_alt_colour, 1,0,0,1) # this doesn't seem clever. need to make the   glUniform4fv work then make one call to set the 2 colours
+				GL.glVertexAttrib4f(self.colour_shader_alt_colour, 1,0,0,1) # this doesn't seem clever. need to make the glUniform4fv work then make one call to set the 2 colours
 				self.aris.bind()
 				GL.glDrawElementsui(GL.GL_LINES, self.aris) # draw the lines
 				self.aris.unbind()

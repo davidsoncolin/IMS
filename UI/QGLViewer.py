@@ -57,8 +57,8 @@ class Camera:
 		if self.cameraDistortion is None and x2ds_out is not None: x2ds_out[:] = x2ds
 		if self.cameraDistortion is None: return
 		if x2ds_out is None: x2ds_out = x2ds
-		ISCV.undistort_points(x2ds, -float(self.cameraKox), -float(self.cameraKoy),\
-							  float(self.cameraDistortion[0]), float(self.cameraDistortion[1]), x2ds_out)
+		ISCV.undistort_points	(x2ds, -float(self.cameraKox), -float(self.cameraKoy),\
+								float(self.cameraDistortion[0]), float(self.cameraDistortion[1]), x2ds_out)
 		
 	def computeDistortionMap(self):
 		# compute the distortion map
@@ -219,7 +219,7 @@ class Camera:
 
 
 class QGLView(QtOpenGL.QGLWidget):
-	# emit on object selection.  value is index in self.primitives (or None) 
+	# emit on object selection. value is index in self.primitives (or None) 
 	pickSignal = QtCore.Signal(object, object, bool)
 	# emit on drag
 	dragSignal = QtCore.Signal(object, str)
@@ -249,7 +249,7 @@ class QGLView(QtOpenGL.QGLWidget):
 		self.layers = {}
 		self.selectionLayers = []
 
-		self.setFocusPolicy(QtCore.Qt.WheelFocus)  # get all events
+		self.setFocusPolicy(QtCore.Qt.WheelFocus) # get all events
 
 		#: OR mask of draw options - passed to primitive paintGL calls to control what kinds of
 		#: things are drawn
@@ -406,8 +406,8 @@ class QGLView(QtOpenGL.QGLWidget):
 		self.width, self.height = width, height
 		GL.glViewport(0, 0, self.width, self.height)
 		self.qglClearColor(QtGui.QColor(0, 0, 200, 0))
-		GL.glHint(GL.GL_POINT_SMOOTH_HINT,   GL.GL_NICEST)
-		GL.glHint(GL.GL_LINE_SMOOTH_HINT,    GL.GL_NICEST)
+		GL.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST)
+		GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
 		GL.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST)
 		GL.glEnable(GL.GL_POINT_SMOOTH)
 		GL.glEnable(GL.GL_LINE_SMOOTH)
@@ -438,8 +438,8 @@ class QGLView(QtOpenGL.QGLWidget):
 		self.width, self.height = 1280, 720
 		GL.glViewport(0, 0, self.width, self.height)
 		self.qglClearColor(QtGui.QColor(*[x*255 for x in COLOURS['Background']]))
-		GL.glHint(GL.GL_POINT_SMOOTH_HINT,   GL.GL_NICEST)
-		GL.glHint(GL.GL_LINE_SMOOTH_HINT,    GL.GL_NICEST)
+		GL.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST)
+		GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
 		GL.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST)
 		GL.glEnable(GL.GL_POINT_SMOOTH)
 		GL.glEnable(GL.GL_LINE_SMOOTH)
@@ -519,8 +519,8 @@ class QGLView(QtOpenGL.QGLWidget):
 		# since gl is a state machine, we can't assume these settings will persist to the next frame
 		GL.glViewport(0, 0, self.width, self.height)
 		self.qglClearColor(QtGui.QColor(*[x*255 for x in COLOURS['Background']]))
-		GL.glHint(GL.GL_POINT_SMOOTH_HINT,   GL.GL_NICEST)
-		GL.glHint(GL.GL_LINE_SMOOTH_HINT,    GL.GL_NICEST)
+		GL.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST)
+		GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
 		GL.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST)
 		GL.glEnable(GL.GL_POINT_SMOOTH)
 		GL.glEnable(GL.GL_LINE_SMOOTH)
@@ -749,7 +749,7 @@ class QGLView(QtOpenGL.QGLWidget):
 		elif self.tool == '3d pan/tilt' or self.tool == '3d pan/tilt view':
 			# take into account the roll
 			pre = self.camera.RT()
-			self.camera.cameraPan  += 0.1*(self.mouseDx * self.toolCosRoll + self.mouseDy * self.toolSinRoll)
+			self.camera.cameraPan += 0.1*(self.mouseDx * self.toolCosRoll + self.mouseDy * self.toolSinRoll)
 			self.camera.cameraTilt += 0.1*(-self.mouseDy * self.toolCosRoll + self.mouseDx * self.toolSinRoll)
 			self.camera.cameraTilt = np.clip(self.camera.cameraTilt,-90,90)
 			if self.tool == '3d pan/tilt view':
@@ -779,12 +779,12 @@ class QGLView(QtOpenGL.QGLWidget):
 		buttons = event.buttons()
 		modifiers = event.modifiers()
 		self.mouseX, self.mouseY = event.x(), self.height-1-event.y()
-		self.mouseLeft  = bool(buttons & QtCore.Qt.LeftButton)
-		self.mouseMid   = bool(buttons & QtCore.Qt.MidButton)
+		self.mouseLeft = bool(buttons & QtCore.Qt.LeftButton)
+		self.mouseMid = bool(buttons & QtCore.Qt.MidButton)
 		self.mouseRight = bool(buttons & QtCore.Qt.RightButton)
 		self.mouseShift = bool(modifiers & QtCore.Qt.ShiftModifier)
-		self.mouseCtrl  = bool(modifiers & QtCore.Qt.ControlModifier)
-		self.mouseAlt   = bool(modifiers & QtCore.Qt.AltModifier)
+		self.mouseCtrl = bool(modifiers & QtCore.Qt.ControlModifier)
+		self.mouseAlt = bool(modifiers & QtCore.Qt.AltModifier)
 		if self.mouseAlt:
 			# if the Alt key is pressed, start a 3D operation
 			if self.mouseMid or (self.mouseShift and self.mouseLeft): self.setTool('3d translate')
@@ -863,7 +863,7 @@ def makePrimitives2D(p1 = None, p2 = None):
 	from UI import GLPoints2D
 	primitives2D = []
 	if p1 is not None:
-		primitives2D.append(GLPoints2D(p1))       # dark dots
+		primitives2D.append(GLPoints2D(p1)) # dark dots
 	if p2 is not None:
 		primitives2D.append(GLPoints2D(p2))
 		primitives2D[-1].colour = (1.0,0.5,0,0.5) # light dots - shown in orange
@@ -882,15 +882,15 @@ def makeApp(appName=None, appIn=None, win=None):
 		win = QApp.app
 		if win is None:
 			win = QApp.QApp()
-			win.setFocusPolicy(QtCore.Qt.StrongFocus)  # get keyboard events
+			win.setFocusPolicy(QtCore.Qt.StrongFocus) # get keyboard events
 	if appName is not None:
 		win.setWindowTitle(appName)
 	return app,win
 
-def makeViewer(appName='Imaginarium Viewer',mat=None, md=None, grid=True, primitives=None, primitives2D=None, timeRange=None, \
-			   callback=None, mats=None, camera_ids=None, movies=None, win=None, appIn=None, \
-			   pickCallback=None, dragCallback=None, keyCallback=None, drawCallback=None, dirtyCallback=None,
-		       layers={}, runtime=None):
+def makeViewer (appName='Imaginarium Viewer',mat=None, md=None, grid=True, primitives=None, primitives2D=None, timeRange=None, \
+				callback=None, mats=None, camera_ids=None, movies=None, win=None, appIn=None, \
+				pickCallback=None, dragCallback=None, keyCallback=None, drawCallback=None, dirtyCallback=None,
+				layers={}, runtime=None):
 	'''Helper code to knock up a viewer'''
 	from PySide import QtCore
 	from UI import GLGrid, GLCameras
@@ -904,7 +904,7 @@ def makeViewer(appName='Imaginarium Viewer',mat=None, md=None, grid=True, primit
 		v.primitives.extend(primitives)
 	if primitives2D is not None: v.primitives2D.extend(primitives2D)
 	primitives,primitives2D = v.primitives,v.primitives2D
-	if callback is not None:  # add this last to avoid the callback being called before we're ready
+	if callback is not None: # add this last to avoid the callback being called before we're ready
 		if timeRange is not None: win.qtimeline.setRange(*timeRange)
 		win.qtimeline.cb = callback
 	if dirtyCallback is not None:

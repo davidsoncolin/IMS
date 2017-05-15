@@ -65,8 +65,7 @@ def loadVSS(fn):
 						[x.get('MARKER', x.get('RGB')) for x in dom.findall('MarkerSet')[0].find('Markers')]]
 	colouredMarkers = [x.get('MARKER', x.get('NAME')) for x in dom.findall('MarkerSet')[0].find('Markers')]
 	markerNames = [x.get('MARKER', x.get('NAME')) for x in markers]
-	if hasTargetSet: markerWeights = [float(x.get('WEIGHT')) for x in markers]
-	else:            markerWeights = [1.0 for x in markers]
+	markerWeights = [float(x.get('WEIGHT')) if hasTargetSet else 1.0 for x in markers]
 	markerParents = [x.get('SEGMENT') for x in markers]
 	skeleton = dom.findall('Skeleton')[0]
 	# skeleton is defined as a tree of Segments
@@ -78,8 +77,7 @@ def loadVSS(fn):
 				skel.append([seg.get('NAME'),parent,seg.attrib])
 				ap(seg, len(skel)-1, skel)
 			else:
-				if len(seg) == 0: skel[parent].extend([seg.tag,seg.attrib,{}])
-				else:             skel[parent].extend([seg.tag,seg.attrib,seg[0].attrib])
+				skel[parent].extend([seg.tag,seg.attrib,{} if len(seg) == 0 else seg[0].attrib])
 		return skel
 	# recursively parse the skeleton
 	root = ap(skeleton, -1, [])
@@ -87,8 +85,7 @@ def loadVSS(fn):
 	def cqToR(rs, R):
 		'''Given a compressed quaternion, form a 3x3 rotation matrix.'''
 		angle = np.dot(rs,rs)**0.5
-		if angle > 1e-8: scale = np.sin(angle*0.5)/angle
-		else:            scale = 0.5
+		scale = (np.sin(angle*0.5)/angle if angle > 1e-8 else 0.5)
 		q = np.array([rs[0]*scale,rs[1]*scale,rs[2]*scale,np.cos(angle*0.5)], dtype=np.float32)
 		q = np.outer(q, q)*2
 		R[:3,:3] = [
@@ -108,27 +105,27 @@ def loadVSS(fn):
 		cqToR(float3(preR), pre[:3,:3])
 		cqToR(float3(postR), post[:3,:3])
 		return pre,post
-	name         = fn.rpartition('/')[2].partition('.')[0]
-	numBones     = len(root)
-	jointNames   = [r[0] for r in root]
+	name = fn.rpartition('/')[2].partition('.')[0]
+	numBones = len(root)
+	jointNames = [r[0] for r in root]
 	markerParents = np.array([jointNames.index(mp) for mp in markerParents],dtype=np.int32)
 	jointNames[0] = 'root' # !!!! WARNING !!!!
 	jointParents = [r[1] for r in root]
-	jointData    = [mats(r[4]) for r in root]
-	jointTypes   = [r[3] for r in root] # JointDummy(0)/JointHinge(1)/JointHardySpicer(2)/JointBall(3)/JointFree(6)
+	jointData = [mats(r[4]) for r in root]
+	jointTypes = [r[3] for r in root] # JointDummy(0)/JointHinge(1)/JointHardySpicer(2)/JointBall(3)/JointFree(6)
 	#jointTemplates = [mats(r[5]) for r in root] # JointTemplate ... contains the same data as jointTypes
-	jointAxes    = [r[4].get('AXIS',r[4].get('AXIS-PAIR',r[4].get('EULER-ORDER','XYZ'))) for r in root] # order
-	jointTs      = [r[4].get('T',None) for r in root]
+	jointAxes = [r[4].get('AXIS',r[4].get('AXIS-PAIR',r[4].get('EULER-ORDER','XYZ'))) for r in root] # order
+	jointTs = [r[4].get('T',None) for r in root]
 	Gs = np.zeros((numBones,3,4),dtype=np.float32) # GLOBAL mats
 	Ls = np.zeros((numBones,3,4),dtype=np.float32) # LOCAL mats
 	Bs = np.zeros((numBones,3),dtype=np.float32) # BONES
 	for ji,pi in enumerate(jointParents):
 		if pi == -1: Ls[ji] = jointData[ji][0]
-		else:        np.dot(jointData[pi][1][:,:3],jointData[ji][0],out=Ls[ji]); Ls[ji,:,3] += jointData[pi][1][:,3]
+		else: np.dot(jointData[pi][1][:,:3],jointData[ji][0],out=Ls[ji]); Ls[ji,:,3] += jointData[pi][1][:,3]
 	dofNames = []
 	jointChans = [] # tx=0,ty,tz,rx,ry,rz
 	jointChanSplits = [0]
-	 # TODO: locked channels
+	# TODO: locked channels
 	for ji,(jt,T) in enumerate(zip(jointTypes,jointTs)):
 		jointChanSplits.append(len(jointChans))
 		if jt == 'JointDummy': assert(T is None)

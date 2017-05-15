@@ -42,14 +42,15 @@ def main():
 		global frame_number
 		frame_number = (frame_number + 1) % 1000
 		frame = getViconFrame()
-		file_name = "C:\\temp\\saved_frames\\saved_frame_" + str(frame_number) + ".data"
+		prefix =  os.path.join(os.environ['GRIP_TEMP'],'saved_frame_')
+		file_name = prefix + str(frame_number) + ".data"
 		IO.save(file_name,frame)
 		return frame
 
 	def getRecordedFrame():
 		global frame_number
 		frame_number = frame_number + 1
-		prefix       =  "C:\\temp\\saved_frames\\saved_frame_"
+		prefix =  os.path.join(os.environ['GRIP_TEMP'],'saved_frame_')
 		file_name = prefix + str(frame_number) + ".data"
 		if ( not os.path.isfile(file_name) ):
 			frame_number = 1

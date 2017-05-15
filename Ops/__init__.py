@@ -17,18 +17,18 @@ import Vicon
 import StreamSkeleton
 
 try:
-    import Xsens
+	import Xsens
 except Exception as e:
-    print("Unable to load Xsens: %s" % e)
+	print("Unable to load Xsens: %s" % e)
 
 import sys
 if 'linux' in sys.platform:
-    try:
-        from pxr import Usd
-        import USD
-        print '> USD Loaded'
-    except:
-        pass
+	try:
+		from pxr import Usd
+		import USD
+		print '> USD Loaded'
+	except:
+		pass
 
 #import Video
 

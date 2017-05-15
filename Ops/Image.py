@@ -16,7 +16,7 @@ class Blur(Op.Op):
 			('locations', 'Locations', 'Locations', 'string', locations, {}),
 			('b1', 'Small blur radius', 'This is part of the image blur filter which controls the size of smallest detected features.', 'float', b1, {"min" :0.0, "max": 20.0}),
 			('b2', 'Large blur radius', 'This is part of the image blur filter which controls the size of largest detected features.', 'float', b2, {"min": 0.0, "max": 20.0}),
-			('showresult',  'Show Result', 'Display the result of this Filter', 'bool', True)
+			('showresult', 'Show Result', 'Display the result of this Filter', 'bool', True)
 		]
 
 		super(self.__class__, self).__init__(name, fields)
@@ -80,11 +80,11 @@ class BlurPartial(Op.Op):
 
 			if self.trained:
 
-				trained_image = self.subtractors[img_index].apply(img, learningRate=0)  # Input Image - Current
+				trained_image = self.subtractors[img_index].apply(img, learningRate=0) # Input Image - Current
 				# Threshold the image
 				_, thresh = cv2.threshold(trained_image, 0, 255, cv2.THRESH_BINARY)
 				im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-				contours_clean = [contour for contour in contours if  cv2.contourArea(contour) > 5000]  # Threshold the contours
+				contours_clean = [contour for contour in contours if cv2.contourArea(contour) > 5000] # Threshold the contours
 				plate = np.zeros(shape=img.shape, dtype=np.uint8)
 
 				boxes = []
@@ -198,7 +198,7 @@ class BlurChangedArea(Op.Op):
 			('locations', 'Locations', 'Locations', 'string', locations, {}),
 			('b1', 'Small blur radius', 'This is part of the image blur filter which controls the size of smallest detected features.', 'float', b1, {"min" :0.0, "max": 20.0}),
 			('b2', 'Large blur radius', 'This is part of the image blur filter which controls the size of largest detected features.', 'float', b2, {"min": 0.0, "max": 20.0}),
-			('showresult',  'Show Result', 'Display the result of this Filter', 'bool', True)
+			('showresult', 'Show Result', 'Display the result of this Filter', 'bool', True)
 		]
 		super(self.__class__, self).__init__(name, fields)
 		self.subtractors = []
@@ -233,7 +233,7 @@ class BlurPython(Op.Op):
 			('locations', 'Locations', 'Locations', 'string', locations, {}),
 			('b1', 'Small blur radius', 'This is part of the image blur filter which controls the size of smallest detected features.', 'float', b1, {"min" :0.0, "max": 20.0}),
 			('b2', 'Large blur radius', 'This is part of the image blur filter which controls the size of largest detected features.', 'float', b2, {"min": 0.0, "max": 20.0}),
-			('showresult',  'Show Result', 'Display the result of this Filter', 'bool', True)
+			('showresult', 'Show Result', 'Display the result of this Filter', 'bool', True)
 		]
 
 		self.lookup = np.power((np.arange(256, dtype=np.float32) + 20.0) / 275.0, 0.4545) * 255

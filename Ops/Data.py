@@ -9,7 +9,7 @@ import IO
 
 class Export(Op.Op):
 	def __init__(self, name='/Export_Data', locations='', saveTo='', exactMatch=True, enable=True,
-	             attrsWhiteList='', attrsBlackList='', frameRange='', allowOverride=True):
+				attrsWhiteList='', attrsBlackList='', frameRange='', allowOverride=True):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('dataLocations', 'locations', 'Data locations', 'string', locations, {}),
@@ -137,7 +137,7 @@ class Import(Op.Op):
 
 class Send(Op.Op):
 	def __init__(self, name='/SendData', locations='', camerasRootLocation='', pubPort=-1, calibration='', topic='',
-				 id_='', cameraIndex=0, timecode='99:99:99:99'):
+				id_='', cameraIndex=0, timecode='99:99:99:99'):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -182,14 +182,14 @@ class Send(Op.Op):
 									'dark_detections': interface.attrs('/root/camera/dark'),
 									'bright_detections': interface.attrs('/root/camera/bright'),
 									'timecode': attrs['timecode']},
-								    attrs['topic'])
+									attrs['topic'])
 		else:
 			self.logger.error("No publisher set to send data on to.")
 
 
 class SendImage(Op.Op):
 	def __init__(self, name='/SendData', locations='', streamLocation='', camerasRootLocation='', pubPort=-1, calibration='', topic='',
-				 id_='', cameraIndex=0, timecode='99:99:99:99'):
+				id_='', cameraIndex=0, timecode='99:99:99:99'):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -254,7 +254,7 @@ class SendImage(Op.Op):
 
 class SendImages(Op.Op):
 	def __init__(self, name='/SendData', locations='', camerasRootLocation='', pubPort=-1, calibration='', topic='',
-				 id_='', cameraIndex=0, timecode='99:99:99:99'):
+				id_='', cameraIndex=0, timecode='99:99:99:99'):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -297,14 +297,14 @@ class SendImages(Op.Op):
 									'dark_detections': interface.attrs('/root/camera/dark'),
 									'bright_detections': interface.attrs('/root/camera/bright'),
 									'timecode': attrs['timecode']},
-								    attrs['topic'])
+									attrs['topic'])
 		else:
 			self.logger.error("No publisher set to send data on to.")
 
 
 class SendDetections(Op.Op):
 	def __init__(self, name='/SendData', locations='', camerasRootLocation='', pubPort=-1, topic='',
-				 id_='', cameraIndex=0, timecode='99:99:99:99'):
+				id_='', cameraIndex=0, timecode='99:99:99:99'):
 		self.fields = [
 			('name', 'name', 'name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -346,7 +346,7 @@ class SendDetections(Op.Op):
 									'imgs': interface.attr('imgs')[0] if training['send_plate'] else None,
 									'updateMats': interface.attr('updateMats', False)
 									},
-								    attrs['topic'])
+									attrs['topic'])
 		else:
 			self.logger.error("No publisher set to send data on to.")
 

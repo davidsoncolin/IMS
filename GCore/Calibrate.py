@@ -73,12 +73,12 @@ def decomposeR(R, axes='yxz'):
 		float[3]: "ret" - resulting rotation in degrees
 	"""
 	i = ord(axes[0])-ord('x')
-	if len(axes) == 1: parity = 1 # single channel
-	else:              parity = (ord(axes[1])-ord(axes[0])+3)
+	if len(axes) == 1:	parity = 1 # single channel
+	else:				parity = (ord(axes[1])-ord(axes[0])+3)
 	j,k = (i+parity)%3,(i+2*parity)%3
 	cj = (R[i,i]**2 + R[j,i]**2)**0.5
-	if cj > 1e-30: ret = np.array([np.arctan2(R[k,j],R[k,k]),np.arctan2(-R[k,i],cj),np.arctan2(R[j,i],R[i,i])],dtype=np.float32)
-	else:          ret = np.array([np.arctan2(-R[j,k],R[j,j]),np.arctan2(-R[k,i],cj),0.0],dtype=np.float32)
+	if cj > 1e-30:	ret = np.array([np.arctan2(R[k,j],R[k,k]),np.arctan2(-R[k,i],cj),np.arctan2(R[j,i],R[i,i])],dtype=np.float32)
+	else:			ret = np.array([np.arctan2(-R[j,k],R[j,j]),np.arctan2(-R[k,i],cj),0.0],dtype=np.float32)
 	if ((parity%3) == 2): ret = -ret
 	return np.degrees(ret) #[:len(axes)]
 
@@ -86,8 +86,8 @@ def decomposeRT(RT, interest=None, setInterest=True):
 	from math import atan2, sqrt
 	R,T = RT[:3,:3],RT[:3,3]
 	cj = sqrt(R[1,1]*R[1,1] + R[0,1]*R[0,1])
-	if cj > 1e-30: ret = np.array([atan2(R[2,0],R[2,2]),atan2(-R[2,1],cj),atan2(R[0,1],R[1,1])])
-	else:          ret = np.array([atan2(-R[0,2],R[0,0]),atan2(-R[2,1],cj),0.0])
+	if cj > 1e-30:	ret = np.array([atan2(R[2,0],R[2,2]),atan2(-R[2,1],cj),atan2(R[0,1],R[1,1])])
+	else:			ret = np.array([atan2(-R[0,2],R[0,0]),atan2(-R[2,1],cj),0.0])
 	if setInterest: interest = sqrt(np.dot(T,T)) # choose an interest distance based on the origin
 	return -np.degrees(ret), -np.dot(R.T, T + [0,0,interest]), interest
 
@@ -130,9 +130,9 @@ def decomposeKRT(P):
 	# P[0,:3].RT[2,:3] = ox
 	# P[0,:3].RT[1,:3] = skew
 	RT[0,:3] = np.cross(RT[1,:3],RT[2,:3]) # assuming RHCS
-	K[0,2] = ox   = np.dot(P[0,:3],RT[2,:3])
-	K[0,1] = skew = np.dot(P[0,:3],RT[1,:3]) # should be 0.0
-	K[0,0] = fx   = np.dot(P[0,:3],RT[0,:3])
+	K[0,2] = ox		= np.dot(P[0,:3],RT[2,:3])
+	K[0,1] = skew	= np.dot(P[0,:3],RT[1,:3]) # should be 0.0
+	K[0,0] = fx		= np.dot(P[0,:3],RT[0,:3])
 	RT[0,3] = (P[0,3] - skew * RT[1,3] - ox * RT[2,3])/fx
 	return K, RT # hopefully fx == fy and skew == 0.0 ...!
 
@@ -299,7 +299,7 @@ def cv2_solve_camera_from_3d(x3ds, x2ds, Kin=None, distortion=None, solve_distor
 	Use opencv to solve a camera from corresponding 2d and 3d points.
 	
 	Because opencv uses a left-handed coordinate system, we do some funky maths.
-		Our equation: K RT [x;y;z;1] = a[px;py;-1]   (with a > 0)
+		Our equation: K RT [x;y;z;1] = a[px;py;-1] (with a > 0)
 		OPENCV eqn:   K RT [x;y;z;1] = a[px;py; 1]
 	
 	Let X3 = diag(1;-1;-1) be a matrix that flips y and z (== rotation 180 degrees about x).
@@ -386,7 +386,7 @@ def cv2_solve_camera_from_3d_multi(x3ds, x2ds, Kin=None, distortion=None, solve_
 	Use opencv to solve a camera from corresponding 2d and 3d points.
 	
 	Because opencv uses a left-handed coordinate system, we do some funky maths.
-		Our equation: K RT [x;y;z;1] = a[px;py;-1]   (with a > 0)
+		Our equation: K RT [x;y;z;1] = a[px;py;-1] (with a > 0)
 		OPENCV eqn:   K RT [x;y;z;1] = a[px;py; 1]
 	
 	Let X3 = diag(1;-1;-1) be a matrix that flips y and z (== rotation 180 degrees about x).
@@ -486,7 +486,7 @@ def detect_wand(x2ds_data, x2ds_splits, mats, thresh=20. / 2000., x3d_threshold=
 	count = ISCV.project_and_clean(x3ds, Ps, x2ds_data, x2ds_splits, x2ds_labels, x2ds_labels2, thresh ** 2, thresh ** 2, x3d_threshold)
 	if count < 3: return None, None, None
 	x3ds, x3ds_labels, E_x2ds_single, x2ds_single_labels = Recon.solve_x3ds(x2ds_data, x2ds_splits, x2ds_labels2, Ps)
-	assert np.all(x3ds_labels == [0, 1, 2, 3, 4]), 'ERROR: Labels do not match'  # skip if somehow not all points seen
+	assert np.all(x3ds_labels == [0, 1, 2, 3, 4]), 'ERROR: Labels do not match' # skip if somehow not all points seen
 	assert np.max(x3ds ** 2) < 1e9, 'ERROR: Values out of bounds' + repr(x3ds)
 	mat = rigid_align_points(wand_x3ds, x3ds)
 	x3ds = np.dot(wand_x3ds, mat[:3, :3].T) + mat[:, 3]
@@ -494,9 +494,9 @@ def detect_wand(x2ds_data, x2ds_splits, mats, thresh=20. / 2000., x3d_threshold=
 
 def boot_cameras_from_wand(wand_frames, cameras_info, lo_focal_threshold=0.5, hi_focal_threshold=4.0, cv_2d_threshold=0.02):
 	"""
-	Attempt to boot position of cameras from 2d data containing a wand.  This is assumed to be 5 marker T wand.
+	Attempt to boot position of cameras from 2d data containing a wand. This is assumed to be 5 marker T wand.
 	
-	TODO: Generalise size of wand to allow 120mm, 240mm, 780mm etc variations.  Also use actual measurements of wand.
+	TODO: Generalise size of wand to allow 120mm, 240mm, 780mm etc variations. Also use actual measurements of wand.
 
 	Args:
 		wand_frames

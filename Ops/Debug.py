@@ -76,9 +76,9 @@ class PrintInterface(Op.Op):
 
 class CalculatePoseEffectorPositions(Op.Op):
 	def __init__(self, name='/Calculate Effector Positions', locations='', effectorsName='effectors',
-	             pointSize=10., colour=(0.6, 0.1, 0.7, 0.7), frameRange='', useWeights=False, labels='',
-	             calibration='', showContributions=True, visualiseLabels=False, enableCache=True,
-	             colourGroups=False, seed=0):
+				pointSize=10., colour=(0.6, 0.1, 0.7, 0.7), frameRange='', useWeights=False, labels='',
+				calibration='', showContributions=True, visualiseLabels=False, enableCache=True,
+				colourGroups=False, seed=0):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Skeleton locations', 'Skeleton locations', 'string', locations, {}),
@@ -144,14 +144,13 @@ class CalculatePoseEffectorPositions(Op.Op):
 		interface.setAttr('effectorLabels', effectorLabels)
 		interface.setAttr('effectorData', effectorData)
 
-		markerWeights = skelDict['markerWeights']  # if attrs['useWeights'] else None
+		markerWeights = skelDict['markerWeights'] # if attrs['useWeights'] else None
 
 		x3ds, x3ds_labels = SolveIK.skeleton_marker_positions(skelDict, skelDict['rootMat'], skelDict['chanValues'],
-		                                                      effectorLabels, effectorData, markerWeights)
+															effectorLabels, effectorData, markerWeights)
 		# effectorTargets = np.zeros_like(effectorData[1])
 		# weights = skelDict['markerWeights'] if attrs['useWeights'] else None
-		# x3ds_labels, x3ds = self.get_pose_effector_positions(skelDict['chanValues'], effectorLabels, skelDict, effectorData, effectorTargets,
-		#                                                         skelDict['rootMat'], weights)
+		# x3ds_labels, x3ds = self.get_pose_effector_positions(skelDict['chanValues'], effectorLabels, skelDict, effectorData, effectorTargets, skelDict['rootMat'], weights)
 		x3ds_colours = np.array([], dtype=np.float32)
 		x3ds_joints = []
 		if attrs['colourGroups']:
@@ -177,9 +176,9 @@ class CalculatePoseEffectorPositions(Op.Op):
 					x3ds_colours[li] = colours[parent]
 
 		# Colour marker points based on labels if we have been given any (from a detection location)
-		#   Not labelled: Red
-		#   Labelled (more than one ray): Green
-		#   Labelled (one ray): Blue
+		# Not labelled: Red
+		# Labelled (more than one ray): Green
+		# Labelled (one ray): Blue
 		#x3ds_colours = np.array([], dtype=np.float32)
 		cameraContributions = {}
 		cameraPositions = None
@@ -435,7 +434,7 @@ class UpdateVelocities(Op.Op):
 
 class SolveX3ds(Op.Op):
 	def __init__(self, name='/Solve 3D from labels', locations='', calibration='', pointSize=12., colour=(0.3, 0.9, 0.7, 0.7),
-	             showContributions=True):
+				showContributions=True):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Detections locations', 'Detections locations', 'string', locations, {}),
@@ -512,7 +511,7 @@ class SolveSkeletonFrom3D(Op.Op):
 
 class SolveSkeletonFrom2D(Op.Op):
 	def __init__(self, name='/Solve skeleton from 2D', locations='', detections='', calibration='', labels='', outerIterations=5,
-	             pointSize=14., colour=(0.4, 0.3, 0.4, 0.7), showContributions=True):
+				pointSize=14., colour=(0.4, 0.3, 0.4, 0.7), showContributions=True):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'Skeleton locations', 'Skeleton locations', 'string', locations, {}),
@@ -548,7 +547,7 @@ class SolveSkeletonFrom2D(Op.Op):
 		mats = interface.attr('mats', atLocation=calibration)
 
 		s_x3ds, s_x3d_labels, E, s_x2d_labels = SolveIK.solve_skeleton_from_2d(x2ds, splits, labels, effectorLabels, Ps, skelDict, effectorData,
-		                                                                       skelDict['rootMat'], outerIts=attrs['outerIts'])
+																			skelDict['rootMat'], outerIts=attrs['outerIts'])
 		interface.setAttr('skelDict', skelDict)
 
 		# Find which cameras contribute to the 3D reconstructions (optional?)
@@ -875,7 +874,7 @@ class CreateMarkersFromLabels(Op.Op):
 		for m_idx, v_idx in zip(marker_inds, vert_inds):
 			markerJointsMap[m_idx] = []
 			for ji, verts in weights[0].iteritems():
-				if v_idx in verts[0]:  # and ji in jointIndsMap:
+				if v_idx in verts[0]: # and ji in jointIndsMap:
 					# Find joint name
 					# markerJointsMap[m_idx].append(jointIndsMap[ji]['name'])
 					for jname, jnum in weights[1].iteritems():
@@ -931,7 +930,7 @@ class CreateMarkersFromLabels(Op.Op):
 					offset = np.dot(np.linalg.inv(jointGs), markerWorldPos)
 					markerOffsets.append(offset[:3])
 
-					print '  Weight:', jointWeight[3], '->', jointName
+					print ' Weight:', jointWeight[3], '->', jointName
 					initialWeight = 1. / pow(np.linalg.norm(offset[:3]), 2)
 
 					if 'Spine' in jointName or 'Chest' in jointName:
@@ -956,7 +955,7 @@ class CreateMarkersFromLabels(Op.Op):
 				for jointName, jointWeight in joints:
 					if jointWeight[3] > maxWeight:
 						maxWeight = jointWeight[3]
-						maxIndex  = skelDict['jointIndex'][jointName]
+						maxIndex = skelDict['jointIndex'][jointName]
 
 				if maxIndex != -1:
 					lbl = chosen_labels[mi]
@@ -1266,7 +1265,7 @@ class CollectTrackingDetections(Op.Op):
 
 class LabellingTest(Op.Op):
 	def __init__(self, name='/Labelling Test', locations='', calibration='', skeleton='', intersect_threshold=100., generateNormals=True,
-	             tiltThreshold=0.0002, x2dThreshold=0.01, x3dThreshold=30.0, minRays=3):
+				tiltThreshold=0.0002, x2dThreshold=0.01, x3dThreshold=30.0, minRays=3):
 		fields = [
 			('name', 'Name', 'Name', 'string', name, {}),
 			('locations', 'locations', 'locations', 'string', locations, {}),
@@ -1287,9 +1286,9 @@ class LabellingTest(Op.Op):
 		for c0, c1, m in zip(splits[:-1], splits[1:], mats):
 			K, RT, T = m[0], m[1], m[4]
 			crays = rays[c0:c1]
-			np.dot(x2ds[c0:c1], RT[:2, :3], out=crays)  # ray directions (unnormalized)
+			np.dot(x2ds[c0:c1], RT[:2, :3], out=crays) # ray directions (unnormalized)
 			crays -= np.dot([-K[0, 2], -K[1, 2], K[0, 0]], RT[:3, :3])
-		rays /= (np.sum(rays * rays, axis=1) ** 0.5).reshape(-1, 1)  # normalized ray directions
+		rays /= (np.sum(rays * rays, axis=1) ** 0.5).reshape(-1, 1) # normalized ray directions
 		return rays
 
 	def intersect_rays(self, attrs, x2ds, splits, Ps, mats, seed_x3ds=None, tilt_threshold=0.0002, x2d_threshold=0.01, x3d_threshold=30.0, min_rays=3, lod={}):
@@ -1311,7 +1310,7 @@ class LabellingTest(Op.Op):
 			return a / (np.sum(a ** 2) ** 0.5)
 
 		tilt_axes = np.array([norm(np.dot([-m[0][0, 2], -m[0][1, 2], m[0][0, 0]], m[1][:3, :3])) for m in mats], dtype=np.float32)
-		corder = np.array(list(itertools.combinations(range(numCameras), 2)), dtype=np.int32)  # all combinations ci < cj
+		corder = np.array(list(itertools.combinations(range(numCameras), 2)), dtype=np.int32) # all combinations ci < cj
 		clouds = ISCV.HashCloud2DList(x2ds, splits, x2d_threshold)
 		x3ds_ret = []
 		if seed_x3ds is not None:
@@ -1327,7 +1326,7 @@ class LabellingTest(Op.Op):
 				uj += splits[cj]
 				axis = Ts[cj] - Ts[ci]
 				tilt_i = np.dot(map(norm, np.cross(rays[ui], axis)), tilt_axes[ci])
-				tilt_j = np.dot(map(norm, np.cross(rays[uj], axis)), tilt_axes[ci])  # NB tilt_axes[ci] not a bug
+				tilt_j = np.dot(map(norm, np.cross(rays[uj], axis)), tilt_axes[ci]) # NB tilt_axes[ci] not a bug
 				io = np.argsort(tilt_i)
 				jo = np.argsort(tilt_j)
 				ii, ji = 0, 0
@@ -1357,13 +1356,10 @@ class LabellingTest(Op.Op):
 						x3d = np.linalg.solve(np.dot(E0.T, E0) + np.eye(3) * 1e-7, -np.dot(E0.T, e0))
 
 						# if lod:
-						# 	proj_x2ds, proj_splits, proj_labels = ISCV.project_visibility2(np.array([x3d], dtype=np.float32), np.array([0], dtype=np.int32), Ps,
-						# 	                                                              lod['tris'], lod['cameraPositions'], lod['normals'],
-						# 	                                                              attrs['intersect_threshold'], attrs['generateNormals'])
+						# 	proj_x2ds, proj_splits, proj_labels = ISCV.project_visibility2(np.array([x3d], dtype=np.float32), np.array([0], dtype=np.int32), Ps,lod['tris'], lod['cameraPositions'], lod['normals'],attrs['intersect_threshold'], attrs['generateNormals'])
 						# 	sc, labels_out, _ = clouds.assign(proj_x2ds, proj_splits, proj_labels, x2d_threshold)
 						# else:
 						sc, labels_out, _ = clouds.project_assign(np.array([x3d], dtype=np.float32), np.array([0], dtype=np.int32), Ps, x2d_threshold)
-
 
 						tmp = np.where(labels_out == 0)[0]
 						if len(tmp) >= min_rays:
@@ -1394,7 +1390,7 @@ class LabellingTest(Op.Op):
 		if lod:
 			if self.visibility is None: self.visibility = ISCV.ProjectVisibility.create()
 			self.visibility.setLods(lod['tris'], lod['cameraPositions'], lod['normals'],
-			                        attrs['intersect_threshold'], attrs['generateNormals'])
+									attrs['intersect_threshold'], attrs['generateNormals'])
 			proj_x2ds, proj_splits, proj_labels = ISCV.project_visibility(x3ds_ret, x3ds_labels, Ps, self.visibility)
 			sc, labels_out, _ = clouds.assign(proj_x2ds, proj_splits, proj_labels, x2d_threshold)
 		else:
@@ -1436,7 +1432,7 @@ class LabellingTest(Op.Op):
 			lod['normals'] = np.concatenate((lodNormals))
 
 		x3ds, x3d_labels = self.intersect_rays(attrs, x2ds, splits, Ps, mats, tilt_threshold=attrs['tilt_threshold'], x2d_threshold=attrs['x2d_threshold'],
-		                                       x3d_threshold=attrs['x3d_threshold'], min_rays=attrs['min_rays'], lod=lod)
+											x3d_threshold=attrs['x3d_threshold'], min_rays=attrs['min_rays'], lod=lod)
 
 		pAttrs = {
 			'x3ds': x3ds,
@@ -1615,7 +1611,7 @@ class CreateROI(Op.Op):
 		p2ds = np.zeros((2, len(new_points.keys()), 2), dtype=int)
 		for ki, key in enumerate(new_points.keys()):
 			for cam in new_points[key]:
-				p2ds[cam, ki, :] = new_points[key][cam]  # copy(new_points[key][cam])
+				p2ds[cam, ki, :] = new_points[key][cam] # copy(new_points[key][cam])
 				new_points[key][cam] = coord[new_points[key][cam][0], new_points[key][cam][1]]
 
 		view0, view1, labels = [], [], []
@@ -1751,7 +1747,7 @@ class VisualiseNormals(Op.Op):
 			effectorLabels = np.array([int(mn) for mn in skelDict['markerNames']], dtype=np.int32)
 			effectorData = SolveIK.make_effectorData(skelDict)
 			x3ds, x3ds_labels = SolveIK.skeleton_marker_positions(skelDict, skelDict['rootMat'], skelDict['chanValues'],
-			                                                      effectorLabels, effectorData, skelDict['markerWeights'])
+																effectorLabels, effectorData, skelDict['markerWeights'])
 
 			normals = skelDict['markerNormals']
 			# for ni, (parent, normal) in enumerate(zip(skelDict['markerParents'], normals)):

@@ -11,7 +11,7 @@ class GLSkeleton:
 		self.names, self.parents, self.vertices = names, parents, np.array(vertices,dtype=np.float32,copy=True).reshape(-1,3)
 		self.idx = np.array([[bi,pi] for bi,pi in enumerate(self.parents) if pi != -1],dtype=np.int32).reshape(-1)
 		self.graph = None
-		self.name  = None
+		self.name = None
 		self.drawNames = False
 		self.nameWidths = None
 		self.color = (1,1,1)
@@ -46,7 +46,7 @@ class GLSkeleton:
 		GL.glPointSize(10)
 		GL.glVertexPointerf(self.vertices)
 		GL.glDrawArrays(GL.GL_POINTS, 0, len(self.vertices))
-		if self.name and  DRAWOPT_LABELS & drawOpts:
+		if self.name and DRAWOPT_LABELS & drawOpts:
 			GL.glColor3f(*self.color)
 			phi = np.max(self.vertices,axis=0)
 			plo = np.min(self.vertices,axis=0)
