@@ -117,74 +117,7 @@ def picked(view,data,clearSelection=True):
 		primitives[2].setData(np.concatenate((primitives[2].vertices,primitives[0].vertices[index:index+1])))
 	view.updateGL()
 
-#@profile
 
-
-def kpts_to_numpy(kpts,image):
-	height = image.shape[0]
-	width  = image.shape[1]
-	psc = np.array([2.0/width,-2.0/width],dtype=np.float32)
-	pof = np.array([-1.0,height/float(width)],dtype=np.float32)
-	return np.array([[x,y] for ((x,y),a,(r,g,b)) in kpts],dtype=np.float32).reshape(-1,2)*psc + pof
-
-	n_points = len(kpts)
-	array = np.empty( (n_points,2), dtype=np.float32)
-	for i,kpt in enumerate(kpts):
-		((x,y),area,(r,g,b)) = kpt
-		array[i,0] = x
-		array[i,1] = y
-	return array
-
-
-"""
-standard is s list of ( (x,y), area, (r,g,b)
-"""
-#@profile
-def sorting_hat(standard):
-	#import VPS
-	"""
-	#import VPS
-	k1 = k2 = 1
-	small_blur = large_blur = 1.0
-	variance_threshold = 16
-	vps_images = VPS.list_wrap_vps_filter_image_2d(greyscale_image, variance_threshold,  small_blur,  k2,  large_blur)
-	vps_image  = vps_images[0]
-	"""
-	light = []
-	dark = []
-	if ( len(standard) > 0 ):
-		sum_intensity = 0.0
-		for tuple in standard:
-			((x,y),area,(r,g,b)) = tuple
-			intensity = 0.299 * r + 0.587 * g + 0.144 * b
-			sum_intensity += intensity
-		average_intensity = sum_intensity/len(standard)
-
-		for tuple in standard:
-			((x,y),area,(r,g,b)) = tuple
-			intensity = 0.299 * r + 0.587 * g + 0.144 * b
-			#level = vps_image[int(y),int(x)]
-			#sorting_dictionary[level].append(tuple)
-			if ( intensity  > average_intensity ):
-				light.append(tuple)
-			else:
-				dark.append(tuple)
-	return dark, [], light
-
-
-	#sorted_keys = sorted( sorting_dictionary.keys() )
-	#return map( lambda key : sorting_dictionary[key],sorted_keys )
-	#print("keys = ", keys)
-	#sys.exit(0)
-
-	#from scipy import misc
-	#misc.imsave(file_name,vps_images[0])
-	return standard
-"""
-colour_image: original image
-data:        processed image
-"""
-#@profile
 def get_dark_and_light_points(colour_image, frame_index, camera_index, opts):
 	data = filter_movie_frame(colour_image, opts['small_blur'], opts['large_blur'])
 	good_darks, pts0 = Detect.detect_dots(255-data, opts['threshold_dark_inv'], opts)
@@ -257,7 +190,7 @@ def setFrame(frame):
 			primitives[0].setData(x3ds)
 		if detectingTiara:
 			global c3d_frames
-			frame = c3d_frames[(frame-57) % len(c3d_frames)] # 57 at home, 55 at work... TODO
+			frame = c3d_frames[(frame-55) % len(c3d_frames)]
 			which = np.where(frame[:,3] == 0)[0]
 			x3ds = frame[which,:3]
 			#print frame,'len',len(x3ds)
@@ -272,14 +205,23 @@ def process_frame(deinterlacing, detectingTiara, detectingWands, frame, opts, pa
 	#data = filter_movie_frame(img, small_blur, large_blur)
 	#img, data = get_processed_movie_frame(md, frame, small_blur, large_blur, deinterlacing)
 	QApp.view().cameras[ci + 1].invalidateImageData()
-
+	"""
+	if 1:  # show the filtered image
+		img[:] = data
+		pass
+	if 0:  # crush the image to see the blobs
+		lookup = np.zeros(256, dtype=np.uint8)
+		lookup[threshold_bright:] = 255
+		lookup[255 - threshold_dark_inv:threshold_bright] = 128
+		img[:] = lookup[img]
+	"""
 	if 1:
 		good_darks, pts0, good_lights, pts1, data = get_dark_and_light_points(img, frame, ci, opts)
-		if 1: # show the filtered image
+		if 1:  # show the filtered image
 			#print "data before insertion", type(data), data.shape
 			#sys.exit(0)
 			img[:] = data
-		if 0: # crush the image to see the blobs
+		if 0:  # crush the image to see the blobs
 			lookup = np.zeros(256, dtype=np.uint8)
 			lookup[threshold_bright:] = 255
 			lookup[255 - threshold_dark_inv:threshold_bright] = 128
@@ -295,11 +237,12 @@ def process_frame(deinterlacing, detectingTiara, detectingWands, frame, opts, pa
 			match_threshold = 0.07 * 2
 			x2ds_labels = -np.ones(pts1.shape[0], dtype=np.int32)
 			x2ds_splits = np.array([0, pts1.shape[0]], dtype=np.int32)
-			ISCV.label_T_wand(pts1, x2ds_splits, x2ds_labels, ratio, x2d_threshold, straightness_threshold, match_threshold)
+			ISCV.label_T_wand(pts1, x2ds_splits, x2ds_labels, ratio, x2d_threshold, straightness_threshold,
+							  match_threshold)
 			print x2ds_labels
 
 			for r, li in zip(good_lights, x2ds_labels):
-				if li != -1: # make some red boxes
+				if li != -1:  # make some red boxes
 					dx, dy = 10, 10
 					img[int(r.sy - dy):int(r.sy + dy), int(r.sx - dx):int(r.sx + dx), 0] = 128
 	else:
@@ -381,7 +324,7 @@ def test_2D(frames, x3ds, detections, mats, x2d_threshold = 0.025):
 	return ret
 
 def main():
-	global State, mats, movieFilenames, primitives, detectingTiara
+	global State, mats, movieFilenames, primitives
 	global movies, primitives2D, deinterlacing, detectingWands
 	import IO
 	import sys,os
@@ -438,7 +381,6 @@ def main():
 	elif 1:
 		xcp_filename = '50_Grip_RoomCont_AA_02.xcp'
 		detections_filename = 'detections.dat'
-		detectingTiara = True
 		pan_tilt_roll = (0,0,0)
 		distortion = (0.291979,0.228389)
 		directory = os.path.join(os.environ['GRIP_DATA'],'151110')
@@ -491,7 +433,7 @@ def main():
 	primitives.append(GLPoints3D([]))
 	primitives.append(GLPoints3D([]))
 	primitives.append(GLPoints3D([]))
-	primitives[0].colour = (0,1,1,0.5) # back-projected "cyan" points
+	primitives[0].colour = (0,1,1,0.5)   # back-projected "cyan" points
 	primitives[1].colour = (0,0,1,0.5)
 	primitives[1].pointSize = 5
 	primitives[2].colour = (1,0,0,0.99)
@@ -507,10 +449,10 @@ def main():
 		if detectingTiara:
 			x3ds_seq = {}
 			for fi in dot_detections.keys():
-				frame = c3d_frames[(fi-57) % len(c3d_frames)] # 57 at home, 55 at work... TODO
+				frame = c3d_frames[(fi-55) % len(c3d_frames)]
 				which = np.array(np.where(frame[:,3] == 0)[0],dtype=np.int32)
-				x3ds_seq[fi] = 	np.concatenate((VICON_tiara_x3ds + np.array([150,-100,0],dtype=np.float32),frame[which,:3])), \
-								np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
+				x3ds_seq[fi] = np.concatenate((VICON_tiara_x3ds + np.array([150,-100,0],dtype=np.float32),frame[which,:3])), \
+							   np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
 
 			dot_labels = get_labels(dot_detections.keys(), x3ds_seq, dot_detections, mats, x2d_threshold = 0.05)
 
@@ -524,10 +466,10 @@ def main():
 				dot_detections = IO.load(detections_filename)[1]
 				x3ds_seq = {}
 				for fi in dot_detections.keys():
-					frame = c3d_frames[(fi-57) % len(c3d_frames)] # 57 at home, 55 at work... TODO
+					frame = c3d_frames[(fi-55) % len(c3d_frames)]
 					which = np.array(np.where(frame[:,3] == 0)[0],dtype=np.int32)
-					x3ds_seq[fi] =	np.concatenate((VICON_tiara_x3ds + np.array([0,1000,0],dtype=np.float32),frame[which,:3])), \
-									np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
+					x3ds_seq[fi] = np.concatenate((VICON_tiara_x3ds + np.array([0,1000,0],dtype=np.float32),frame[which,:3])), \
+								   np.concatenate((np.arange(len(VICON_tiara_x3ds),dtype=np.int32),which+len(VICON_tiara_x3ds)))
 
 				#dot_labels = get_labels(dot_detections.keys(), x3ds_seq, dot_detections, mats, x2d_threshold = 0.05)
 

@@ -1,9 +1,6 @@
 import IO
 import time
 import zmq
-from zmq import Poller
-
-__author__ = 'DavidJ'
 
 """
 Class to serve and broadcast any type of motion-capture data, provided it is
@@ -82,7 +79,7 @@ class ReframeServer:
 		self.current_frame = -1
 		all_frames = []
 
-		poller = Poller()
+		poller = zmq.Poller()
 
 		while self.started:
 			socks = dict(poller.poll())
