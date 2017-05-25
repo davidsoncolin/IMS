@@ -2061,7 +2061,7 @@ object filter_image(object &o_image, int b1, int b2)
 	float *bd3 = &blur3[0];
 	const int chans = 3; //image._chans;
 	std::vector<float> lookup(256);
-	for (int i = 0; i < 256; ++i) lookup[i] = float(pow((i+20)/275.0,0.4545));
+	for (int i = 0; i < 256; ++i) lookup[i] = float(pow((i+20)/275.0,2.2));
 	for (int i = rows*cols-1; i >= 0; --i) bd1[i] = lookup[data[i*chans]]; // extract a single-channel image
 	std::copy(bd1,bd1+rows*cols,bd2);
 	
@@ -2075,7 +2075,7 @@ object filter_image(object &o_image, int b1, int b2)
 	for (int row = 0; row < rows; ++row) {
 		for (int col = 0; col < cols; ++col,wd+=3,++rd1,++rd2) {
 			// ?????????????
-			float v = ((*rd1 / *rd2)-0.75)*512.0;
+			float v = (*rd1 / *rd2)*128.0;
 			wd[0] = wd[1] = wd[2] = (unsigned char)std::max<float>(0.0,std::min<float>(v,255.0));
 			//float v = (sqrtf(*rd1 + 20) - sqrtf(*rd2 + 20))*3.0 + 128.0;
 			//wd[0] = wd[1] = wd[2] = (unsigned char)std::min<float>(std::max<float>(0.0,v),255.0);

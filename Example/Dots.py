@@ -126,7 +126,7 @@ def get_dark_and_light_points(colour_image, frame_index, camera_index, opts):
 
 #@profile
 def setFrame(frame):
-	global State, mats, movieFilenames, primitives, detectingTiara
+	global State, mats, movieFilenames, primitives
 	global movies, primitives2D, deinterlacing, detectingWands, dot_detections, track3d, prev_frame, booting, trackGraph
 	key = State.getKey('dotParams/attrs')
 	
@@ -138,7 +138,7 @@ def setFrame(frame):
 	if True: #dot_detections is None:
 
 		for pair in enumerate(movies):
-			pts = process_frame(deinterlacing, detectingTiara, detectingWands, frame, key, pair)
+			pts = process_frame(deinterlacing, detectingWands, frame, key, pair)
 			p0.append(pts[0])
 			p1.append(pts[1])
 		def make_bounds(lens): return np.array([sum(lens[:x]) for x in xrange(len(lens)+1)],dtype=np.int32)
@@ -199,7 +199,7 @@ def setFrame(frame):
 	QApp.app.updateGL()
 
 #@profile
-def process_frame(deinterlacing, detectingTiara, detectingWands, frame, opts, pair):
+def process_frame(deinterlacing, detectingWands, frame, opts, pair):
 	ci, md = pair
 	img = get_movie_frame(md, frame, deinterlacing)
 	#data = filter_movie_frame(img, small_blur, large_blur)

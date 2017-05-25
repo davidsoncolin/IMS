@@ -7,7 +7,6 @@ from UI import QApp, GLMeshes # TODO move this colin
 from GCore import State, Calibrate, Character
 from copy import deepcopy
 
-g_trans_list = {'thumbBend1', 'thumbBend3', 'thumbBend2', 'thumbSwivel', 'middleBend1', 'middleBend3', 'middleBend2', 'breath', 'ankle', 'FK_IK_switch', 'stretchy', 'ballSwivel', 'useLocator', 'heelPeel', 'tipToe', 'thumbOrient', 'legTwist', 'crossEyes', 'indexBend1', 'indexBend3', 'indexBend2', 'splay', 'pinkySwivel', 'smooth', 'squashAndStretch', 'toeTap', 'eyesLockedToWorld', 'lowerBackRotateX', 'lowerBackRotateZ', 'pinkyBend2', 'pinkyBend3', 'pinkyBend1'}
 g_transformTypes = {'transform', 'joint', 'locator','ikHandle', 'airField','hikFKJoint'} # derived from transform
 g_constraintTypes = {'aimConstraint', 'orientConstraint', 'normalConstraint', 'parentConstraint', 'pointConstraint', 'poleVectorConstraint', 'scaleConstraint', 'tangentConstraint', 'geometryConstraint', 'lookAt'} # derived from constraint
 g_transformTypes.update(g_constraintTypes) # constraint derived from transform
