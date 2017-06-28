@@ -112,8 +112,10 @@ def decodeString(s,offset,refs):
 	return ret, offset+4+l
 
 def decodeStringList(s,offset,refs):
-	ret,offset = decodeString(s,offset,refs)
-	return ret.split(chr(0)),offset
+	ret,offset = decodeString(s,offset,[])
+	ret = ret.split(chr(0))
+	refs.append(ret)
+	return ret,offset
 
 class Marker(str): pass
 M = {tuple:('(',[Marker(')')]),list:('[',[Marker(']')]),set:('|',[Marker('_')])}

@@ -114,7 +114,7 @@ def import_aam(): load_object('aam', 'AAM Files (*.io)', '/aam')
 
 def save_object(desc, filetype, key):
 	print 'exporting',desc
-	aam_fn,_ = QApp.app.loadFilename('Choose a file to write '+desc, cwd(), desc)
+	aam_fn,_ = QApp.app.saveFilename('Choose a file to write '+desc, cwd(), filetype)
 	IO.save(aam_fn,State.getKey(key))
 
 def load_object(desc, filetype, key):
@@ -485,7 +485,7 @@ if __name__ == '__main__':
 
 	if 1:
 		grip_dir = os.environ['GRIP_DATA']
-		pred_fn = os.path.join(grip_dir,'train.out')
+		pred_fn = os.path.join(grip_dir,'face/train.out')
 		import_predictor(pred_fn)
 
 	if 0:
