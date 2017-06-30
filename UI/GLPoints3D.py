@@ -120,8 +120,9 @@ class GLPoints3D:
 					which_empty = np.where(ds == 0)[0]
 					which_pts = np.where(ds == 1)[0]
 					which_crosses = np.where(ds == 2)[0]
-					GL.glColor4f(*self.colour)
+					GL.glColor4f(1,1,0,1)
 					self.drawPoints(which_empty, p0)
+					GL.glColor4f(*self.colour)
 					self.drawPoints(which_pts, p0)
 					self.drawCrosses(which_crosses, p0)
 				GL.glDisableClientState(GL.GL_COLOR_ARRAY)

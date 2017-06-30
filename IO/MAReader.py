@@ -1770,7 +1770,7 @@ if __name__ == '__main__':
 	from UI import QGLViewer
 	evaluate_scenegraph(nodeLists)
 	fields,dnodes = maya_to_state(nodes)
-	#IO.save('out.nodes',(nodes,nodeLists)) # TODO TODO this doesn't load because of something that happens in the evaluate_scenegraph (an unsupported back reference, could be a bug)
+	IO.save('out.nodes',(nodes,nodeLists))
 	grip_data = extract_GRIP(nodeLists)
 	#IO.save('out.grip',grip_data)
 	primitives,primitives2D,mats,camera_ids,movies = construct_geos(nodeLists)

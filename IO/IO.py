@@ -134,24 +134,25 @@ def encode(data, s = None, refs = None):
 	while queue:
 		data = queue.popleft()
 		t,did = type(data),id(data)
-		if t is Marker      : s.extend(str(data))
-		elif t in transtypes: s.extend(transvals[data])
-		elif t in basetypes : v,f = basetypes[t]; s.extend(v+f(data))
-		elif did in refs    : s.extend('r'+intpack(refs[did][0]))
+		if t is Marker       : s.extend(str(data))
+		elif t in transtypes : s.extend(transvals[data])
+		elif t in basetypes  : v,f = basetypes[t]; s.extend(v+f(data))
+		elif did in refs     : s.extend('r'+intpack(refs[did][0]))
 		else:
 			refs[did] = (len(refs),data) # NOTE we maintain a reference inside the tuple, just in case it's a temporary
 			if t is str      : s.extend('"'+intpack(len(data))+data)
 			elif t is unicode: data = data.encode('utf8'); s.extend('u'+intpack(len(data))+data)
-			elif t is dict :
-				v = data.values()
-				if len(v) > 1 and isinstance(v[0],np.ndarray) and isinstance(v[1],np.ndarray): # concatenate a list of arrays into a single array
+			elif t is dict   :
+				ks,vs = data.keys(),data.values()
+				if len(ks): ks,vs = map(list,zip(*sorted(data.items()))) # for stable files
+				if len(vs) > 1 and isinstance(vs[0],np.ndarray) and isinstance(vs[1],np.ndarray): # concatenate a list of arrays into a single array
 					try: 
-						v1 = np.array(v,dtype=v[0].dtype)
-						assert np.all(v==v1)
-						v = v1
+						v1 = np.array(vs,dtype=vs[0].dtype)
+						assert np.all(vs==v1)
+						vs = v1
 					except: pass # an exception means it can't be concatenated
 				s.extend('{')
-				queue.extendleft([Marker('}'),v,data.keys()])
+				queue.extendleft([Marker('}'),vs,ks])
 			elif t in M:
 				if t is list :
 					try: # a string list is encoded differently
@@ -200,7 +201,7 @@ def decode(s, offset = 0, refs = None):
 			ri = unpack_from('<I',s,offset)[0]
 			ref = refs[ri]
 			if ref is None: # the reference is a tuple which hasn't been created yet; later on we can try to fix this..
-				fixes.setdefault(ri,[]).append(map(len,rv)+[len(queue)])
+				fixes.setdefault(ri,[]).append([rv[-1],len(rv[-1]),len(queue)])
 			queue.append(ref); offset = offset + 4
 		elif k == '"' :
 			ret,offset = decodeString(s,offset,refs)
@@ -240,16 +241,13 @@ def decode(s, offset = 0, refs = None):
 			refs[ri] = ret
 			queue = rv.pop(); queue.append(ret)
 			if ri in fixes: # try to find all the references and fix them
-				updepth = len(rv)+1
-				for indlist in fixes[ri]:
-					node = ret
-					for i in indlist[updepth:-1]:
-						if type(node) is list: node = node[i]
-						elif type(node) is tuple: node = node[i-1]
-						elif type(node) is dict: assert(False)
-						elif type(node) is set: assert(False)
-					assert(node[indlist[-1]] is None)
-					node[indlist[-1]] = ret # must be a list
+				for rl,i,j in fixes.pop(ri):
+					node = rl[0]
+					if isinstance(node,list): node[j] = ret
+					elif isinstance(node,dict):
+						assert i == 2
+						node[rl[1][j]] = rl[2][j] = ret
+					else: assert False,repr(node)
 		elif k == '[' :
 			ret = []
 			refs.append(ret); rv.append(queue); queue = ret
@@ -286,6 +284,8 @@ def save(fn, payload):
 	writeStream(f.write, (header,payload))
 
 def test():
+	d = ({},); d[0]['a']=d; e,_=decode(encode(d)) # this hard case is causing a crash
+	assert e[0]['a'] is e
 	for x in [[],(),{},set(),{0},{0:1},[0],(1),'hi',u"Kl\xc3ft",['s','u'],0.123,dict(zip(['a','b'],np.eye(2,dtype=np.float32))),[1,2]]:
 		assert repr(decode(str(encode(x)))[0]) == repr(x),'failed test'+repr(decode(str(encode(x)))[0])+' vs '+repr(x)
 	a = {}

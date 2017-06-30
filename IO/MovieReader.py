@@ -237,7 +237,7 @@ def open_file(filename, audio=True, frame_offset=0, debugging=False, volume_ups=
 		if debugging: print 'vfps', vfps
 		aduration = asamplerate/vfps # NOTE, we believe in this case the audio packet pts is SAMPLES, not TICKS. aduration is SAMPLES PER FRAME
 		vmaxframe = vformat.contents.streams[videoStream].contents.nb_frames
-		if vmaxframe <= 0: vmaxframe = 8000
+		if vmaxframe <= 0: print 'vmax error',vmaxframe; vmaxframe = 80000
 	except Exception, e:
 		print 'no video: ',e
 		videoStream,pVCodecCtx,videoCodec,pVFrame,pVFrameRGB,vwidth,vheight = None,None,None,None,None,0,0
