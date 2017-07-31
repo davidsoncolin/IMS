@@ -583,10 +583,17 @@ class QGLView(QtOpenGL.QGLWidget):
 		# draw the marquee, if set
 		if self.marquee is not None: self.drawMarquee(*self.marquee)
 
+	def getDepth(self, x,y):
+		#depth = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
+		depth = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_INT)[0][0]
+		# for some reason, we are only getting 20 or so reliable bits. this HACK is a workaround to make clicking less annoying
+		# accuracy is ~2 parts in a million
+		return (depth | 0xfff)/float(0x7fffffff)
+
 	def select(self, x, y):
 		self.paintGL()
-		root_depth = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
-		debug=0
+		root_depth = self.getDepth(x,y)
+		debug=False
 		if debug: print root_depth
 		if root_depth == 1.0: return None
 		GL.glMatrixMode(GL.GL_PROJECTION)
@@ -604,19 +611,19 @@ class QGLView(QtOpenGL.QGLWidget):
 		ci = self.cameras.index(self.camera)-1
 		for pi,p in enumerate(self.primitives2D):
 			p.paintGL(ci,self.camera.cameraInterest,p1=p.len(ci),drawOpts=self.drawOpts)
-			dist = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
+			dist = self.getDepth(x,y)
 			if dist == root_depth:
 				lo,hi = 0,p.len(ci)
 				while lo+1 < hi:
 					GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
 					mid = int((lo+1+hi)/2)
 					p.paintGL(ci, self.camera.cameraInterest, lo, mid, drawOpts=self.drawOpts)
-					dist = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
+					dist = self.getDepth(x,y)
 					if debug: print (lo,mid,hi,dist,hits)
 					if dist == root_depth: hi = mid
 					else:
 						p.paintGL(ci, self.camera.cameraInterest, mid, hi, drawOpts=self.drawOpts)
-						dist2 = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
+						dist2 = self.getDepth(x,y)
 						if dist2 == root_depth:
 							lo = mid
 						else:
@@ -630,8 +637,8 @@ class QGLView(QtOpenGL.QGLWidget):
 			if isinstance(p, GLGrid): continue
 			GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
 			p.paintGL(drawOpts=self.drawOpts)
-			dist = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
-			if debug: print dist
+			dist = self.getDepth(x,y)
+			if debug: print dist,root_depth,dist==root_depth,dist-root_depth
 			if dist == root_depth:
 				if debug: print ('looking for',root_depth,p)
 				lo,hi = 0,len(p)
@@ -639,12 +646,13 @@ class QGLView(QtOpenGL.QGLWidget):
 					GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
 					mid = int((lo+1+hi)/2)
 					p.paintGL(lo, mid, drawOpts=self.drawOpts)
-					dist = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
-					if debug: print (lo,mid,hi,dist,dist2,root_depth)
+					dist = self.getDepth(x,y)
+					if debug: print (lo,mid,hi,dist,root_depth)
 					if dist == root_depth: hi = mid
 					else:
 						p.paintGL(mid, hi, drawOpts=self.drawOpts)
-						dist2 = GL.glReadPixels(x, y, 1, 1, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)[0][0]
+						dist2 = self.getDepth(x,y)
+						if debug: print 'here',lo,hi,dist,dist2,root_depth
 						if dist2 == root_depth:
 							lo = mid
 						else:
@@ -666,11 +674,9 @@ class QGLView(QtOpenGL.QGLWidget):
 		mat3 = self.camera.P()
 		P = np.dot(mat1,np.dot(mat2,mat3))
 		hw,hh = self.width*0.5,self.height*0.5
-		# TODO something is wrong. this used to work, but now it doesn't 0.99445 HACK HACK
-		x2d = np.array([x/hw-1,y/hh-1,0.99445*root_depth,1],dtype=np.float32)
-		x3d = np.dot(np.linalg.inv(P),x2d)
-		x3d/=x3d[3]
-		self.camera.cameraT = x3d[:3]
+		x2d = np.array([x/hw-1,y/hh-1,2*root_depth-1,1],dtype=np.float32)
+		x3d = np.linalg.solve(P,x2d)
+		self.camera.cameraT = x3d[:3] / x3d[3]
 		self.updateGL()
 
 	def endTool(self):
