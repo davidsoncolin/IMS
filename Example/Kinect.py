@@ -1,7 +1,6 @@
 import numpy as np
 import time, os
-import FaceTrack
-from GCore import Calibrate
+from GCore import Calibrate, Face
 try:
 	import freenect
 except:
@@ -219,19 +218,24 @@ def cb(frame):
 	geom_mesh = QApp.app.getLayer('geom_mesh')
 	geom_mesh.setImage(img)
 	
-	if 0:
+	if 1:
 		depths = freenect.sync_get_depth(format=freenect.DEPTH_REGISTERED)[0]
 		#print 'depths',np.median(depths)
 		
-		#if frame not in g_record: return
-		#img,depths = g_record[frame]['video'],g_record[frame]['depths']
-		#g_record[frame] = {'video':img.copy(),'depths':depths.copy()}
-		#if frame == 99: IO.save('dump',g_record)
+		if 0: # recording
+			if frame not in g_record: return
+			img,depths = g_record[frame]['video'],g_record[frame]['depths']
+			g_record[frame] = {'video':img.copy(),'depths':depths.copy()}
+			if frame == 99: IO.save('dump',g_record)
 		
 		depths_sum = np.array(depths != 0,dtype=np.int32)
-		depths_lo = np.array(depths[::2,::2]+depths[1::2,::2]+depths[::2,1::2]+depths[1::2,1::2],dtype=np.float32)
 		lookup = np.array([0,1,0.5,1.0/3,0.25],dtype=np.float32)
-		depths_lo = depths_lo * lookup[(depths_sum[::2,::2]+depths_sum[1::2,::2]+depths_sum[::2,1::2]+depths_sum[1::2,1::2]).reshape(-1)].reshape(depths_lo.shape)
+		if 1: # average
+			depths_lo = np.array(depths[::2,::2]+depths[1::2,::2]+depths[::2,1::2]+depths[1::2,1::2],dtype=np.float32)
+			depths_lo = depths_lo * lookup[(depths_sum[::2,::2]+depths_sum[1::2,::2]+depths_sum[::2,1::2]+depths_sum[1::2,1::2]).reshape(-1)].reshape(depths_lo.shape)
+		else: # fullsize
+			depths_lo = depths*lookup[depths_sum.reshape(-1)].reshape(depths_lo.shape)
+
 		K,RT,P,ks,T,wh = g_camera_mat
 		vs = depths_to_points(g_camera_rays, T, depths_lo)
 		geom_mesh.setVs(vs.reshape(-1,3))
@@ -241,7 +245,7 @@ def cb(frame):
 	#geom_mesh.image = camera.image
 	#geom_mesh.bindImage = camera.bindImage
 	#geom_mesh.bindId = camera.bindId
-	global g_predictor, g_detector, reference_3d, geo_vs, geo_vts
+	global g_predictor, reference_3d, geo_vs, geo_vts
 	h,w,_3 = img.shape
 	
 	global g_prev_vs
@@ -249,36 +253,40 @@ def cb(frame):
 	except: g_prev_vs = None
 	use_prev_vs = True
 	
-	tmp = FaceTrack.detect_face(img, g_detector, g_predictor) if g_prev_vs is None else g_prev_vs
-	tmp = FaceTrack.track_face(img, g_predictor, tmp, numIts=5)
+	if g_prev_vs is None: reference_3d[:,:2] = g_predictor['ref_shape']*[100,100]
+	tmp = Face.detect_face(img, g_predictor) if g_prev_vs is None else g_prev_vs
+	tmp = Face.track_face(img, g_predictor, tmp)
 	if use_prev_vs: g_prev_vs = tmp
-	if frame == 0 or FaceTrack.test_reboot(img, g_prev_vs): g_prev_vs = None
+	if frame == 0 or Face.test_reboot(img, g_prev_vs): g_prev_vs = None
 	geo_vts[:len(tmp)] = tmp
-	if g_predictor[0]: geo_vts[:,1] = img.shape[0]-geo_vts[:,1]
-	
+	geo_vts[:,1] = img.shape[0]-geo_vts[:,1]
+
 	current_shape = geo_vts[:len(tmp)].copy()
 
-	if 0:
+	if 1:
 		ds = extract_depths(vs, current_shape*0.5)
-		M,inliers = Calibrate.rigid_align_points_inliers(ds, reference_3d, scale=True, threshold_ratio=200.0)
+		M,inliers = Calibrate.rigid_align_points_inliers(ds, reference_3d, scale=True, threshold_ratio=5.0)
 		ds = np.dot(ds,M[:3,:3].T)+M[:,3]
-		reference_3d[inliers] = ds[inliers]
+		which = np.where(np.sum((reference_3d - ds)**2,axis=1) < 100*100)[0]
+		reference_3d[which] = reference_3d[which] * 0.99 + ds[which] * 0.01
+		reference_3d[inliers] = reference_3d[inliers] * 0.95 + ds[inliers] * 0.05
 		ds[:] = reference_3d[:]
 		M[1,3] += 1000
+		M[0,3] -= 300
 	else:
 		M = np.eye(3,4,dtype=np.float32)
 		M[1,3] += 1000
 	geom_mesh.setPose(M.reshape(1,3,4))
 	
-	ref_pinv = g_predictor[1]
+	ref_pinv = g_predictor['ref_pinv']
 	xform = np.dot(ref_pinv,current_shape)
 	ut,s,v = np.linalg.svd(xform)
 	s = (s[0]*s[1])**-0.5
 	xform_inv = np.dot(v.T,ut.T)*s
 	current_shape = np.dot(current_shape - np.mean(current_shape,axis=0), xform_inv) * 100.
 	geo_vs[:] = 0
-	geo_vs[:len(current_shape),:2] = current_shape * [1,1 if g_predictor[0] else -1] # convert from y-down to y-up
-	#geo_vs[:68] = ds
+	geo_vs[:len(current_shape),:2] = current_shape
+	geo_vs[:70] = reference_3d
 	#geo_vs[:68,:] += [0,100,5500]
 	#print geo_vts[:4],w,h
 	geo_mesh = QApp.app.getLayer('geo_mesh')
@@ -286,12 +294,12 @@ def cb(frame):
 	geo_mesh.setImage(img)
 	#geo_mesh.transforms[0][:,:3] = [[1,0,0],[0,1,0],[0,0,1],[0,1000,0.1]]
 
-	if 0:
+	if 1:
 		global g_model
 		w,h = 160,160
 		shp = geo_vs[:68,:2]
-		shape_u, tex_u, A_inv, mn = FaceTrack.fit_aam(g_model, tmp, img)
-		FaceTrack.render_aam(g_model, A_inv*0.5, mn*0.5, shape_u, tex_u, img)
+		shape_u, tex_u, A_inv, mn = Face.fit_aam(g_model, tmp, img)
+		Face.render_aam(g_model, A_inv*0.5, mn*0.5, shape_u, tex_u, img)
 
 	img_mesh = QApp.app.getLayer('img_mesh')
 	img_mesh.setImage(img)
@@ -301,31 +309,29 @@ def cb(frame):
 
 #@profile
 def main():
-	global g_model
-	g_model = IO.load('model.train')[1]
-	
-	global g_predictor, g_detector, reference_3d, geo_vs, geo_vts, rect
-	import dlib
-	g_detector = dlib.get_frontal_face_detector()
-	rect = None
 	grip_dir = os.environ['GRIP_DATA']
-	pred_fn = os.path.join(grip_dir,'out.train')
-	g_predictor = FaceTrack.load_predictor(pred_fn, cutOff=15)
-	yup,ref_pinv,reference_shape,splits,leaves,anchor_idx,deltas = g_predictor
+	global g_model
+	g_model = IO.load(os.path.join(grip_dir,'aam.new.io'))[1]
+	
+	global g_predictor, reference_3d, geo_vs, geo_vts, rect
+	rect = None
+	pred_fn = os.path.join(grip_dir,'pred.new.io')
+	g_predictor = Face.load_predictor(pred_fn) #, cutOff=15)
+	reference_shape = g_predictor['ref_shape']
 	size = reference_shape.shape[0]
-	geo_vs = np.zeros((size+4,3),dtype=np.float32)
+	geo_vs = np.zeros((size,3),dtype=np.float32)
 	geo_vs[:size,:2] = reference_shape
-	geo_vts = np.zeros((size+4,2),dtype=np.float32)
+	geo_vts = np.zeros((size,2),dtype=np.float32)
 	geo_vts[:size] = reference_shape + 0.5
 	geo_ts = np.array([[1,0,0,0],[0,1,0,1000],[0,0,1,0]],dtype=np.float32)
-	geo_fs = FaceTrack.triangulate_2D(reference_shape)
+	geo_fs = Face.triangulate_2D(reference_shape)
 	geo_bs = []
 	for p0,p1,p2 in geo_fs:
 		geo_bs.append((p0,p1))
 		geo_bs.append((p1,p2))
 		geo_bs.append((p2,p0))
 	reference_3d = np.zeros((reference_shape.shape[0],3),dtype=np.float32)
-	reference_3d[:,:2] = reference_shape*[100,-100]
+	reference_3d[:,:2] = reference_shape*[100,100]
 	
 	img_vs = np.array([[0,0,0],[640,0,0],[640,480,0],[0,480,0]],dtype=np.float32)
 	img_vts = np.array([[0,1],[1,1],[1,0],[0,0]],dtype=np.float32)
@@ -340,7 +346,7 @@ def main():
 	if 1:
 		kdev = freenect.open_device(kinect,0)
 		freenect.set_led(kdev,0) # turn off LED
-		freenect.set_tilt_degs(kdev,30)
+		freenect.set_tilt_degs(kdev,25)
 		kstate = freenect.get_tilt_state(kdev)
 		freenect.update_tilt_state(kdev)
 		tilt_angle,tilt_status = kstate.tilt_angle,kstate.tilt_status
@@ -354,14 +360,14 @@ def main():
 		roll = np.degrees(np.arctan2(ax,ay))
 		tilt = -np.degrees(np.arctan2(az,(ax**2+ay**2)**0.5))
 
-	fovX = 45.
+	fovX = 62.0
 	pan_tilt_roll = (0,tilt,roll)
 	tx_ty_tz = (0,1000,6000)
 	P = Calibrate.composeP_fromData((fovX,),(pan_tilt_roll),(tx_ty_tz),0)
 
 	
 	global g_camera_rays, g_camera_mat
-	h,w = 480/2,640/2
+	h,w = 480//2,640//2
 	coord,pix_coord = make_coords(h,w)
 	#P = np.eye(3,4,dtype=np.float32)
 	#P[0,0] = P[1,1] = 2.0
