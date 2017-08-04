@@ -216,7 +216,7 @@ g_nodeTypes['dagPose'] = {\
 g_animCurveTypes = {'animCurveUT', 'animCurveUA', 'animCurveTT', 'animCurveTU', 'animCurveUL', 'animCurveUU', 'resultCurve', 'resultCurveTimeToLinear', 'resultCurveTimeToTime', 'resultCurveTimeToUnitless', 'resultCurveTimeToAngular', 'animCurveTA', 'animCurveTL'}
 for nt in g_animCurveTypes: g_nodeTypes.setdefault(nt,{}).update(g_nodeTypes['animCurve']) # nodetypes derived from animCurve
 # these types derive ultimately from dagNode (via curveShape->controlPoint->deformableShape->geometryShape->shape)
-g_shapeTypes = {'camera','mesh','nurbsCurve','subdiv','nurbsSurface','fosterParent'} # derived from shape
+g_shapeTypes = {'camera','mesh','nurbsCurve','subdiv','nurbsSurface','fosterParent','follicle'} # derived from 'shape'
 g_nodeTypes.setdefault('transform',{}).update(g_nodeTypes['dagNode']) # transform derives from dagNode
 for nt in g_shapeTypes:
 	g_nodeTypes.setdefault(nt,{}).update(g_nodeTypes['dagNode']) # shape derives from dagNode
@@ -244,7 +244,7 @@ g_nodeTypes['transformGeometry'] = {\
 	'fn':{'type':'bool','tip':'Controls if the normals of the geometry should be frozen or not. Applies only to polygonal objects.'},\
 	'og':{'type':'geometry','vec':True,'tip':'The ouput transformed geometry'},\
 }
-g_geometryFilterTypes = {'skinCluster','blendShape','tweak','jiggle','cluster','ffd'} # derived from geometryFilter
+g_geometryFilterTypes = {'skinCluster','blendShape','tweak','jiggle','cluster','ffd','wrap'} # derived from geometryFilter
 for nt in g_geometryFilterTypes:
 	g_nodeTypes.setdefault(nt,{}).update(g_nodeTypes['geometryFilter'])
 
@@ -336,16 +336,19 @@ def read_MA(filename):
 				if ran is None and vs is None and val: # there is a single value
 					if vt is None: # try to guess the type
 						if val[0] == 'yes' or val[0] == 'no': vt = 'bool'
-						elif '.' in val[0]: vt = 'float'
-						elif val[0].isdigit() or (val[0].startswith('-') and val[0][1:].isdigit()): vt = 'long'
+						elif val[0][:1].isdigit() or (val[0].startswith('-') and val[0][1:2].isdigit()):
+							if '.' in val[0] or 'e' in val[0]: 	vt = 'float'
+							else:	 							vt = 'long'
+						elif val == ['-s', '1']: continue # TODO setAttr ".uvst" -s 1; seems to be just declaring the size
 						else: print 'read_MA #####WARNING couldn\'t guess type of',val
 					if vt is not None:
 						#print node['name'],node['type'],an_hash,vt,val[:10]
 						if vt == 'bool': val = {'no':False,'yes':True,'0':False,'1':True}[val[0]]
+						elif vt == 'byte' or vt == 'char': val = int(val[0]) # TODO no built-in byte in python...
 						elif vt == 'float' or vt == 'double' or vt == 'doubleAngle' or vt == 'doubleLinear': val = float(val[0])
 						elif vt == 'long' or vt == 'enum' or vt == 'int' or vt == 'short':
 							if '.' in val[0]:
-								print 'read_MA #####WARNING changing type to float', node['name'],node['type'],an_hash,vt,val
+								print 'read_MA #####WARNING changing type to float', node['name'],node['type'],an_hash,vt,val, 'line',line_number
 								vt = g_nodeTypes[node['type']][an_hash]['type'] = 'float'
 								val = float(val[0])
 							else:
@@ -353,12 +356,15 @@ def read_MA(filename):
 						elif vt == 'string': val = strip_quotes(val[0])
 						elif vt == 'pointArray': val = np.array(val[1:],dtype=np.float32).reshape(int(val[0]),4)
 						elif vt == 'matrix': val,_ = extract_matrix(val)
+						elif vt == 'short2' or vt == 'int2': assert(len(val)==2); val = np.array(val,dtype=np.int32)
+						elif vt == 'short3' or vt == 'int3': assert(len(val)==3); val = np.array(val,dtype=np.int32)
 						elif vt == 'float2' or vt == 'double2': assert(len(val)==2); val = np.array(val,dtype=np.float32)
 						elif vt == 'float3' or vt == 'double3': assert(len(val)==3); val = np.array(val,dtype=np.float32)
 						elif vt == 'stringArray': assert(len(val) == int(val[0])+1); val = map(strip_quotes,val[1:])
 						elif vt == 'Int32Array': val = np.array(val[1:],dtype=np.int32).reshape(int(val[0]))
+						elif vt == 'doubleArray': val = np.array(val[1:],dtype=np.float32).reshape(int(val[0]))
 						elif vt == 'componentList': 
-							assert (len(val) == int(val[0])+1)
+							assert (len(val) == int(val[0])+1), '### componentList limited implementation '+repr(val[:10])
 							val = map(strip_quotes,val[1:])
 							if val:
 								val = zip(*map(extract_range, val))
@@ -426,6 +432,7 @@ def read_MA(filename):
 				if '-ln' in l:
 					li = l.index('-ln')+1
 					v['longname'] = strip_quotes(l[li])
+				if '-at' not in l and '-dt' not in l: print line_number,l
 				ti = l.index('-at')+1 if '-at' in l else l.index('-dt')+1
 				tt = v['type'] = strip_quotes(l[ti])
 				#print 'read_MA','addAttr',an
@@ -440,6 +447,7 @@ def read_MA(filename):
 					if tt == 'double' or tt == 'float' or tt == 'doubleLinear' or tt == 'doubleAngle': val = 0.0
 					elif tt == 'short' or tt == 'int' or tt == 'long' or tt == 'enum': val = 0
 					elif tt == 'bool': val = False
+					elif tt == 'byte' or tt == 'char': val = 0
 					elif tt == 'string': val = ''
 					elif tt == 'message': val = '' # ??
 					elif tt == 'float2' or tt == 'double2': val = np.zeros(2,dtype=np.float32)
@@ -529,6 +537,7 @@ def read_MA(filename):
 
 def make_rmat(xyz_degrees, ro=0):
 	#[XYZ, YZX, ZXY, XZY, YXZ, ZYX][ro] NB right-to-left matrix order because our matrices are the transpose of maya
+	if np.allclose(xyz_degrees,0): xyz_degrees = np.zeros(3,dtype=np.float32) # HACK HACK HACK
 	sx,sy,sz = np.sin(np.radians(xyz_degrees))
 	cx,cy,cz = np.cos(np.radians(xyz_degrees))
 	mx = np.array([[1,0,0],[0,cx,-sx],[0,sx,cx]],dtype=np.float32)
@@ -615,6 +624,7 @@ def pickedCB(view,data,clearSelection=True):
 
 def setFrameCB(fi):
 	print 'setFrameCB',fi
+	QApp.app.updateGL()
 
 def matrix_inverse(m):
 	ret = np.zeros((3,4),dtype=np.float32)
@@ -699,7 +709,7 @@ def evaluate_blendWeighted(node):
 g_nodeTypes['unitConversion']['_OUTS'] = {'o'}
 def evaluate_unitConversion(node):
 	cache = node['cache']
-	v = cache['i']
+	v = cache.get('i')
 	if v is None or v is '#':
 		print '###WARNING: evaluate_unitConversion, somehow ended up with None', v
 		v = 0
@@ -711,7 +721,7 @@ g_nodeTypes['reverse']['_OUTS'] = {'o'}
 def evaluate_reverse(node):
 	cache = node['cache']
 	v = cache.get('i',(0,0,0))
-	set_node_cache(node, (('o',np.float32(1.0)-np.array(v,dtype=np.float32),)))
+	set_node_cache(node, (('o',np.float32(1.0)-np.array(v,dtype=np.float32)),))
 
 g_nodeTypes['pairBlend']['_OUTS'] = {'ot','or'}
 def evaluate_pairBlend(node):
@@ -830,7 +840,7 @@ def evaluate_parentConstraint(node):
 	set_node_cache(node, (	('cr',np.array(R,dtype=np.float32)),('ct',np.array(T,dtype=np.float32)),\
 							('crx',float(R[0])),('cry',float(R[1])),('crz',float(R[2])),\
 							('ctx',float(T[0])),('cty',float(T[1])),('ctz',float(T[2])),\
-							('m',m),('wm',wm),('wim',matrix_inverse(wm)))) # TODO remove crx cry etc (use aliases)
+							)) # TODO remove crx cry etc (use aliases)
 
 g_nodeTypes['pointConstraint']['_OUTS'] = {'ct','ctx','cty','ctz','m','wm','wim'}
 def evaluate_pointConstraint(node):
@@ -842,7 +852,7 @@ def evaluate_pointConstraint(node):
 	if 'o' in cache: T += cache['o'] * cache.get('cop',1)
 	set_node_cache(node, (	('ct',np.array(T,dtype=np.float32)),\
 							('ctx',float(T[0])),('cty',float(T[1])),('ctz',float(T[2])),\
-							('m',m),('wm',wm),('wim',matrix_inverse(wm))))
+							))
 
 g_nodeTypes['orientConstraint']['_OUTS'] = {'cr','crx','cry','crz','m','wm','wim'}
 def evaluate_orientConstraint(node):
@@ -854,7 +864,7 @@ def evaluate_orientConstraint(node):
 	# TODO use 'lr' (the previous computed orientation) to figure out the continuity
 	set_node_cache(node, (	('cr',np.array(R,dtype=np.float32)),('lr',cache.get('cr',np.array(R,dtype=np.float32))),\
 							('crx',float(R[0])),('cry',float(R[1])),('crz',float(R[2])),\
-							('m',m),('wm',wm),('wim',matrix_inverse(wm))))
+							))
 
 g_nodeTypes['scaleConstraint']['_OUTS'] = {'cs','csx','csy','csz','m','wm','wim'}
 def evaluate_scaleConstraint(node):
@@ -866,7 +876,7 @@ def evaluate_scaleConstraint(node):
 	if 'o' in cache: S *= cache['o']
 	set_node_cache(node, (	('cs',np.array(S,dtype=np.float32)),\
 							('csx',float(S[0])),('csy',float(S[1])),('csz',float(S[2])),\
-							('m',m),('wm',wm),('wim',matrix_inverse(wm))))
+							))
 
 g_nodeTypes['poleVectorConstraint']['_OUTS'] = {'ct','ctx','cty','ctz','m','wm','wim'}
 def evaluate_poleVectorConstraint(node):
@@ -879,7 +889,7 @@ def evaluate_poleVectorConstraint(node):
 	if 'o' in cache: T += cache['o'] * cache.get('cop',1)
 	set_node_cache(node, (	('ct',np.array(T,dtype=np.float32)),\
 							('ctx',float(T[0])),('cty',float(T[1])),('ctz',float(T[2])),\
-							('m',m),('wm',wm),('wim',matrix_inverse(wm))))
+							))
 
 g_nodeTypes.setdefault('aimConstraint',{})['_OUTS'] = {'cr','crx','cry','crz','m','wm','wim'}
 def evaluate_aimConstraint(node):
@@ -893,7 +903,7 @@ def evaluate_aimConstraint(node):
 	R = decomposeR(m[:,:3], cache.get('cro',0))
 	set_node_cache(node, (	('cr',np.array(R,dtype=np.float32)),\
 							('crx',float(R[0])),('cry',float(R[1])),('crz',float(R[2])),\
-							('m',m),('wm',wm),('wim',matrix_inverse(wm))))
+							))
 
 g_nodeTypes.setdefault('normalConstraint',{})['_OUTS'] = {'cr','crx','cry','crz','m','wm','wim'}
 def evaluate_normalConstraint(node):
@@ -905,7 +915,7 @@ def evaluate_normalConstraint(node):
 	R = decomposeR(m[:,:3], cache.get('cro',0))
 	set_node_cache(node, (	('cr',np.array(R,dtype=np.float32)),\
 							('crx',float(R[0])),('cry',float(R[1])),('crz',float(R[2])),\
-							('m',m),('wm',wm),('wim',matrix_inverse(wm))))
+							))
 
 g_nodeTypes['remapValue']['_OUTS'] = {'ov'}
 def evaluate_remapValue(node):
@@ -1010,13 +1020,12 @@ def evaluate_skinCluster(node):
 	#print '---evaluate_skinCluster',node['name']
 	cache = node['cache']
 	ins = node['ins']
-	
-	ig = cache['ip[0].ig']
+	ig = cache.get('ip[0].ig','#')
 	ig_str = cache.get('#ip[0].ig')
 	gm = cache.get('gm',np.eye(3,4,dtype=np.float32))
 	if ig is '#':
 		print 'WARNING: missing geometry in evaluate_skinCluster'
-		ig = (np.zeros((0,3),dtype=np.float32),node,None) # ??? HACK TODO
+		ig = (np.zeros((418,3),dtype=np.float32),node,None) # ??? HACK TODO
 	igm = ig[2] if ig[2] is not None else np.eye(3,4,dtype=np.float32)
 	assert not 'ip[1].ig' in cache # what would this mean? why is ip a vector?
 	# attrs include: 'dpf', 'gm', 'mi', 'mmi', 'pm', 'ucm', 'wl[%d].w'[0:10448]
@@ -1377,6 +1386,8 @@ g_nodeTypes['joint']['_OUTS'] = {'m','wm','wim'}
 def evaluate_joint(node): pass # suppress warning
 g_nodeTypes['camera']['_OUTS'] = {'m','wm','wim'}
 def evaluate_camera(node): pass # suppress warning
+g_nodeTypes['follicle']['_OUTS'] = {'m','wm','wim'}
+def evaluate_follicle(node): pass # suppress warning; TODO
 g_nodeTypes['locator']['_OUTS'] = {'m','wm','wim'}
 def evaluate_locator(node): pass # suppress warning
 g_nodeTypes['ikHandle']['_OUTS'] = {'m','wm','wim'}
@@ -1389,6 +1400,7 @@ def evaluate_node_in(node, attr, debug, msg):
 	in_node, in_attr = v
 	if debug: print '->attrIn->',attr,'from',in_node['name'],in_attr
 	cv,cvd = None,None
+	#if not in_node['cache'].has_key(in_attr) and in_attr in ['wm','wim','m']: evaluate_transform(in_node) # bogus HACK
 	if not in_node['cache'].has_key(in_attr):
 		nt2 = in_node['type']
 		if in_attr == 'msg' or in_attr in g_nodeTypes[nt2].get('_OUTS',{}): # if it's an out of the node, power the node
@@ -1417,7 +1429,7 @@ def evaluate_node_in(node, attr, debug, msg):
 			cvd = 'default'
 		if cv is '#':
 			assert alias is None
-			if in_node != node: # can't satisfy this, skip the warning TODO
+			if not (in_node is node): # can't satisfy this, skip the warning TODO
 				print 'even after evaluate_node, [',node['type'],']',node['name'],'.',attr,'is empty, with input from',in_node['name'],'.',in_attr,'[',in_node['type'],']'
 				defaults = g_nodeTypes.get(node['type'],{})
 				default_key = defaults.get(attr,{})
@@ -1440,10 +1452,15 @@ def evaluate_node(node, debug=False, msg=0):
 	#	print 'in evaluate_node with',nt,node['name']
 	#	print node.keys()
 	cache = node.setdefault('cache',{})
-	if cache.get('msg',None) == msg: return # already evaluated
+	if cache.get('msg',None) == msg:
+		if debug: print 'already evaluated',cache.keys()
+		return # already evaluated
 	cache.update((('msg',msg),))
-	#parent = node.get('parent',None)
-	#if parent is not None: evaluate_node(parent, debug, msg)
+	parent = node.get('parent',None)
+	if parent is not None: evaluate_node(parent, debug, msg)
+	if g_nodeTypes[nt].has_key('_DAG') and nt != 'transform':
+		if debug: print 'about to eval transform',node['name'],node['type']
+		evaluate_transform(node)
 	for attr,v in node.get('ins',{}).iteritems():
 		if not cache.has_key(attr):
 			evaluate_node_in(node, attr, debug, msg)
@@ -1456,7 +1473,9 @@ def evaluate_node(node, debug=False, msg=0):
 	except:
 		print '### evaluate_node missing %s' % f
 		return
+	if debug: print 'entering',func
 	func(node)
+	if debug: print 'finished',func
 
 #@profile
 def maya_to_state(nodes, use_cache = True):
@@ -1770,13 +1789,18 @@ if __name__ == '__main__':
 	from UI import QGLViewer
 	evaluate_scenegraph(nodeLists)
 	fields,dnodes = maya_to_state(nodes)
-	IO.save('out.nodes',(nodes,nodeLists))
+	print 'loaded'
+	#IO.save('out.nodes',(nodes,nodeLists))
+	#print 'saved'
 	grip_data = extract_GRIP(nodeLists)
+	print 'extracted'
 	#IO.save('out.grip',grip_data)
 	primitives,primitives2D,mats,camera_ids,movies = construct_geos(nodeLists)
+	print 'constructed'
 	QApp.fields = fields
 	gl_primitives = []
 	for primitive in primitives:
 		gl_primitives.append(GLMeshes(**primitive))
+	print 'generated'
 	win.qoutliner.set_root('/root')
 	QGLViewer.makeViewer(primitives=gl_primitives, primitives2D=primitives2D, timeRange = (1,100), mats=mats, camera_ids=camera_ids, movies=movies, callback=setFrameCB, pickCallback=pickedCB, appIn=appIn, win=win)
