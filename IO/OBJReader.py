@@ -91,8 +91,8 @@ def flatten_OBJ_and_x10(geomDict, out=None):
 			if v not in verts:
 				verts[v] = len(verts)
 				out_vs.append(vs[v[0]])
-				out_vts.append(vts[v[1]]) # we assume there is a texture index
-				out_vns.append(vns[v[2]]) # we assume there is a normal index
+				if len(v)>1: out_vts.append(vts[v[1]]) # we assume there is a texture index
+				if len(v)>2: out_vns.append(vns[v[2]]) # we assume there is a normal index
 			out_fs.append(verts[v])
 		out_fs_splits.append(len(out_fs))
 	for tri in tris:
@@ -105,6 +105,7 @@ def flatten_OBJ_and_x10(geomDict, out=None):
 	out['tris'] = np.array(out_tris,dtype=np.int32).reshape(-1,3)
 	out['fs'] = np.array(out_fs,dtype=np.int32)
 	out['fs_splits'] = np.array(out_fs_splits,dtype=np.int32)
+	return out
 
 def poseGeometry(geom, Gs):
 	print geom.keys()
@@ -450,7 +451,7 @@ def animateHead(newFrame):
 	global tony_shape_vector,tony_shape_mat,ted_lo_rest,ted_lo_mat,ted_lo_which,c3d_points
 	global md,movies
 	tony_geom.image,tony_geom.bindImage,tony_geom.bindId = ted_geom.image,ted_geom.bindImage,ted_geom.bindId # reuse the texture!
-	fo = 57 # 57 at home, 55 at work...
+	fo = 55
 	MovieReader.readFrame(md, seekFrame=((newFrame+fo)/2))
 	view = QApp.view()
 	frac = (newFrame % 200) / 100.
@@ -494,7 +495,19 @@ if __name__ == '__main__':
 
 	import UI
 	from UI import QApp, QGLViewer
+	from UI import GLMeshes
+	import os, sys
+	if len(sys.argv) > 1:
+		filename = sys.argv[1]
+		geom_dict = flatten_OBJ_and_x10(read_OBJ(filename))
+		ted_geom = GLMeshes(['ted'],[geom_dict['v']], [geom_dict['tris']], vts = [geom_dict['vt']], transforms = [np.eye(3,4)])
+		primitives = [ted_geom]
+		QGLViewer.makeViewer(primitives = primitives)
+		exit()
+
 	from GCore import Calibrate
+	import MovieReader
+	import C3D
 
 	global ted_geom,ted_geom2,ted_shape,tony_geom,tony_shape,tony_geom2,tony_obj,ted_obj,diff_geom,c3d_frames
 	global tony_shape_vector,tony_shape_mat,ted_lo_rest,ted_lo_mat,c3d_points
@@ -502,12 +515,10 @@ if __name__ == '__main__':
 		
 	ted_dir = os.path.join(os.environ['GRIP_DATA'],'ted')
 
-	import MovieReader
 	wavFilename = os.path.join(ted_dir,'32T01.WAV')
 	md = MovieReader.open_file(wavFilename)
 
 	c3d_filename = os.path.join(ted_dir,'201401211653-4Pico-32_Quad_Dialogue_01_Col_wip_02.c3d')
-	import C3D
 	c3d_dict = C3D.read(c3d_filename)
 	c3d_frames, c3d_fps, c3d_labels = c3d_dict['frames'],c3d_dict['fps'],c3d_dict['labels']
 	if False: # only for cleaned-up data
@@ -541,7 +552,7 @@ if __name__ == '__main__':
 		for target in ['ape']: #['andy','avatar','baboon','bigdog','evilelf','fatbat','feline','fishman','kadel','lizardman','mannequin','shaman','ted','tony','troll','wolf']:
 			if True:
 				#target = 'baboon'
-				target_filename = dat_directory+target+'.dat'
+				target_filename = os.path.join(dat_directory,target+'.dat')
 				if True: #not os.path.exists(target_filename):
 					ted_dir = os.path.join(os.environ['GRIP_DATA'],'ted')
 					tony_obj = readFlatObjFlipMouth(os.path.join(ted_dir,target+'.obj'))
@@ -597,7 +608,7 @@ if __name__ == '__main__':
 				print 'oops',target,e
 
 	if True:
-		geos_filename = dat_directory+'ted_new.dat'
+		geos_filename = os.path.join(dat_directory,'ted_new.dat')
 		if not os.path.exists(geos_filename):
 			ted_obj = readFlatObjFlipMouth(os.path.join(ted_dir,'Ted_NEWRIG_Neutral_Moved.obj'))
 		else:
@@ -620,12 +631,12 @@ if __name__ == '__main__':
 		try:
 			ted_shape_mat = IO.load('ted_shape_mat')[1]
 		except:
-			geos_filename = dat_directory+'ted_new.dat'
+			geos_filename = os.path.join(dat_directory,'ted_new.dat')
 			if not os.path.exists(geos_filename):
 				ted_obj = readFlatObjFlipMouth(os.path.join(ted_dir,'Ted_NEWRIG_Neutral_Moved.obj'))
 			else:
 				_,(ted_obj,nearVerts) = IO.load(geos_filename)
-			_,ted_shapes = IO.load(dat_directory+'ted_shapes.dat')
+			_,ted_shapes = IO.load(os.path.join(dat_directory,'ted_shapes.dat'))
 			num_shapes = len(ted_shapes)
 			ted_shape_mat = np.zeros((num_shapes,ted_shapes[0]['v'].shape[0],3),dtype=np.float32)
 			for t,ts in zip(ted_shape_mat, ted_shapes): t[:] = ts['v']
@@ -675,7 +686,6 @@ if __name__ == '__main__':
 	#tony_shape['v']= renderMotion(Dtgt, localMotion)+ (ted_obj['v'] + ted_shape['v']) - (tony_obj['v'] + [200,0,0])
 
 	drawStyle='smooth'#'wire_over_smooth'
-	from UI import GLMeshes
 	ted_geom = GLMeshes(['ted'],[ted_obj['v']], [ted_obj['tris']], vts = [ted_obj['vt']], transforms = [np.eye(3,4)])
 	#ted_geom = UI.GLGeometry(vs = ted_obj['v'], vts = ted_obj['vt'], tris = ted_obj['tris'], transformData=None, drawStyle=drawStyle)
 	xspacer = np.array([200,0,0],dtype=np.float32)
